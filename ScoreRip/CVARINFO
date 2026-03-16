@@ -1,0 +1,79 @@
+server int score_combo_window_tics = 315;
+server int score_combo_step_percent = 12;
+server int score_combo_max_percent = 220;
+
+server int score_close_range_distance = 160;
+server int score_close_range_bonus_percent = 22;
+server int score_nohit_kills = 5;
+server int score_nohit_bonus_percent = 25;
+server int score_style_weapon_swap_bonus_percent = 15;
+server int score_style_repeat_start_kill = 6;
+server int score_style_repeat_penalty_step = 6;
+server int score_style_repeat_penalty_max = 30;
+server int score_style_multikill_window_tics = 70;
+server int score_style_multikill_bonus2 = 10;
+server int score_style_multikill_bonus3 = 20;
+server int score_style_multikill_bonus4 = 35;
+
+server bool score_penalty_on_death = true;
+server int score_death_penalty = 320;
+
+server int score_bonus_kills100 = 1200;
+server int score_bonus_secrets100 = 900;
+server int score_bonus_items100 = 800;
+server int score_secret_found_bonus = 500;
+server int score_rank_preset = 0;
+
+user bool score_hud_show = true;
+user bool score_hud_show_next = true;
+user bool score_hud_show_rank = true;
+user bool score_hud_show_combo = true;
+user bool score_hud_show_style = true;
+user bool score_ui_use_global_corner = true;
+user int score_ui_corner = 0;
+user int score_hud_corner = 0;
+user int score_hud_right_margin = 0;
+user int score_hud_top_margin = 0;
+user int score_hud_line_spacing = 12;
+user int score_hud_font_size = 0;
+user int score_hud_scale = 100;
+user int score_hud_color_score = 0;
+user int score_hud_color_next = 0;
+user int score_hud_color_rank = 0;
+user int score_hud_color_combo = 1;
+user int score_hud_color_style = 1;
+user int score_hud_color_prestige = 0;
+
+user bool score_killfeed_show = true;
+user bool score_killfeed_show_weapon = true;
+user int score_killfeed_corner = 0;
+user int score_killfeed_lines = 5;
+user int score_killfeed_duration_tics = 175;
+user int score_killfeed_right_margin = 0;
+user int score_killfeed_top_margin = 44;
+user int score_killfeed_font_size = 0;
+user int score_killfeed_scale = 100;
+user int score_killfeed_color_1 = 3;
+user int score_killfeed_color_2 = 3;
+user int score_killfeed_color_3 = 3;
+user int score_killfeed_color_4 = 3;
+user int score_killfeed_color_5 = 3;
+user int score_killfeed_color_6 = 3;
+user int score_killfeed_color_7 = 3;
+user int score_killfeed_color_8 = 3;
+user int score_killfeed_color_9 = 3;
+user int score_killfeed_color_10 = 3;
+
+user bool score_show_reward_gain = true;
+user bool score_log_score_events = true;
+
+user bool score_rankup_sound = true;
+user bool score_newrecord_sound = true;
+user bool score_sound_kills100 = true;
+user bool score_sound_items100 = true;
+user bool score_sound_secrets100 = true;
+
+user bool score_hud_show_prestige = true;
+user bool score_show_endmap_summary = true;
+
+

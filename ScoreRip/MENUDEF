@@ -1,0 +1,233 @@
+OptionValue "ScoreOnOff"
+{
+    0, "Off"
+    1, "On"
+}
+
+OptionValue "ScoreCorner"
+{
+    0, "Top Left"
+    1, "Top Right"
+    2, "Bottom Left"
+    3, "Bottom Right"
+}
+
+OptionValue "ScoreRankPreset"
+{
+    0, "Normal"
+    1, "Fast"
+    2, "Hardcore"
+}
+
+OptionValue "ScoreHudFontSize"
+{
+    0, "Small"
+    1, "Medium"
+    2, "Large"
+}
+
+OptionValue "ScoreTextColor"
+{
+    0, "Gold"
+    1, "Green"
+    2, "Red"
+    3, "Light Blue"
+    4, "White"
+    5, "Yellow"
+    6, "Blue"
+    7, "Orange"
+    8, "Gray"
+    9, "Tan"
+    10, "Brick"
+}
+
+AddOptionMenu "OptionsMenu"
+{
+    Submenu "Score Mod Options", "ScoreModOptions"
+}
+
+OptionMenu "ScoreModOptions"
+{
+    Title "Score Mod Options"
+
+    StaticText "-- Progression --"
+    Option "Rank Progression", "score_rank_preset", "ScoreRankPreset"
+    Slider "Per Secret Bonus", "score_secret_found_bonus", 0, 1500, 25
+    Slider "100% Kills Bonus", "score_bonus_kills100", 0, 3000, 50
+    Slider "100% Secrets Bonus", "score_bonus_secrets100", 0, 3000, 50
+    Slider "100% Items Bonus", "score_bonus_items100", 0, 3000, 50
+    StaticText " "
+
+    Submenu "Rank Book (80)", "ScoreRankBookMenu"
+    StaticText " "
+
+    StaticText "-- Style --"
+    Slider "Close Range Dist", "score_close_range_distance", 0, 512, 8
+    Slider "Close Range Bonus (%)", "score_close_range_bonus_percent", 0, 100, 1
+    Slider "No-Hit Kills Req", "score_nohit_kills", 1, 20, 1
+    Slider "No-Hit Bonus (%)", "score_nohit_bonus_percent", 0, 100, 1
+    Slider "Weapon Swap Bonus (%)", "score_style_weapon_swap_bonus_percent", 0, 100, 1
+    Slider "Repeat Penalty Starts At Kill", "score_style_repeat_start_kill", 2, 20, 1
+    Slider "Repeat Penalty Step (%)", "score_style_repeat_penalty_step", 0, 50, 1
+    Slider "Repeat Penalty Max (%)", "score_style_repeat_penalty_max", 0, 100, 1
+    Slider "Multi-Kill Window (tics)", "score_style_multikill_window_tics", 5, 210, 1
+    Slider "Multi-Kill x2 Bonus (%)", "score_style_multikill_bonus2", 0, 100, 1
+    Slider "Multi-Kill x3 Bonus (%)", "score_style_multikill_bonus3", 0, 120, 1
+    Slider "Multi-Kill x4+ Bonus (%)", "score_style_multikill_bonus4", 0, 150, 1
+    StaticText " "
+
+    StaticText "-- Global UI --"
+    Option "Use Global UI Corner", "score_ui_use_global_corner", "ScoreOnOff"
+    Option "Global UI Corner", "score_ui_corner", "ScoreCorner"
+    StaticText " "
+
+    StaticText "-- Score HUD --"
+    Option "Show Score HUD", "score_hud_show", "ScoreOnOff"
+    Option "Show NEXT line", "score_hud_show_next", "ScoreOnOff"
+    Option "Show Rank line", "score_hud_show_rank", "ScoreOnOff"
+    Option "Show Combo line", "score_hud_show_combo", "ScoreOnOff"
+    Option "Show Style line", "score_hud_show_style", "ScoreOnOff"
+    Option "Show Prestige line", "score_hud_show_prestige", "ScoreOnOff"
+    Option "SCORE Color", "score_hud_color_score", "ScoreTextColor"
+    Option "NEXT Color", "score_hud_color_next", "ScoreTextColor"
+    Option "RANK Color", "score_hud_color_rank", "ScoreTextColor"
+    Option "COMBO Color", "score_hud_color_combo", "ScoreTextColor"
+    Option "STYLE Color", "score_hud_color_style", "ScoreTextColor"
+    Option "PRESTIGE Color", "score_hud_color_prestige", "ScoreTextColor"
+    Option "HUD Font Size", "score_hud_font_size", "ScoreHudFontSize"
+    Slider "HUD Scale (%)", "score_hud_scale", 50, 300, 5
+    Option "HUD Corner", "score_hud_corner", "ScoreCorner"
+    Slider "HUD X Offset", "score_hud_right_margin", 0, 320, 1
+    Slider "HUD Y Offset", "score_hud_top_margin", 0, 300, 1
+    Slider "HUD Line Spacing", "score_hud_line_spacing", 8, 28, 1
+    StaticText " "
+
+    StaticText "-- Kill Feed --"
+    Option "Show Kill Feed", "score_killfeed_show", "ScoreOnOff"
+    Option "Show Weapon In Feed", "score_killfeed_show_weapon", "ScoreOnOff"
+    Option "Kill Feed Corner", "score_killfeed_corner", "ScoreCorner"
+    Slider "Kill Feed Lines", "score_killfeed_lines", 1, 10, 1
+    Slider "Kill Feed Duration (tics)", "score_killfeed_duration_tics", 35, 1400, 5
+    Option "Kill Feed Font Size", "score_killfeed_font_size", "ScoreHudFontSize"
+    Slider "Kill Feed Scale (%)", "score_killfeed_scale", 50, 300, 5
+    Slider "Feed Horizontal Margin", "score_killfeed_right_margin", 0, 320, 1
+    Slider "Feed Vertical Margin", "score_killfeed_top_margin", 0, 500, 1
+    Option "Feed Line 1 Color", "score_killfeed_color_1", "ScoreTextColor"
+    Option "Feed Line 2 Color", "score_killfeed_color_2", "ScoreTextColor"
+    Option "Feed Line 3 Color", "score_killfeed_color_3", "ScoreTextColor"
+    Option "Feed Line 4 Color", "score_killfeed_color_4", "ScoreTextColor"
+    Option "Feed Line 5 Color", "score_killfeed_color_5", "ScoreTextColor"
+    Option "Feed Line 6 Color", "score_killfeed_color_6", "ScoreTextColor"
+    Option "Feed Line 7 Color", "score_killfeed_color_7", "ScoreTextColor"
+    Option "Feed Line 8 Color", "score_killfeed_color_8", "ScoreTextColor"
+    Option "Feed Line 9 Color", "score_killfeed_color_9", "ScoreTextColor"
+    Option "Feed Line 10 Color", "score_killfeed_color_10", "ScoreTextColor"
+    StaticText " "
+
+    StaticText "-- Feedback --"
+    Option "Show Rank Reward Gain", "score_show_reward_gain", "ScoreOnOff"
+    Option "Console Mod Messages", "score_log_score_events", "ScoreOnOff"
+    Option "Show End-Level Score Panel", "score_show_endmap_summary", "ScoreOnOff"
+    StaticText " "
+    StaticText "-- Sounds --"
+    Option "Rank Up Sound", "score_rankup_sound", "ScoreOnOff"
+    Option "New Record Sound", "score_newrecord_sound", "ScoreOnOff"
+    Option "100% Kills Sound", "score_sound_kills100", "ScoreOnOff"
+    Option "100% Items Sound", "score_sound_items100", "ScoreOnOff"
+    Option "100% Secrets Sound", "score_sound_secrets100", "ScoreOnOff"
+    StaticText " "
+    SafeCommand "Reset Score Settings", "resetcvar score_rank_preset; resetcvar score_secret_found_bonus; resetcvar score_bonus_kills100; resetcvar score_bonus_secrets100; resetcvar score_bonus_items100; resetcvar score_close_range_distance; resetcvar score_close_range_bonus_percent; resetcvar score_nohit_kills; resetcvar score_nohit_bonus_percent; resetcvar score_style_weapon_swap_bonus_percent; resetcvar score_style_repeat_start_kill; resetcvar score_style_repeat_penalty_step; resetcvar score_style_repeat_penalty_max; resetcvar score_style_multikill_window_tics; resetcvar score_style_multikill_bonus2; resetcvar score_style_multikill_bonus3; resetcvar score_style_multikill_bonus4; resetcvar score_ui_use_global_corner; resetcvar score_ui_corner; resetcvar score_hud_show; resetcvar score_hud_show_next; resetcvar score_hud_show_rank; resetcvar score_hud_show_combo; resetcvar score_hud_show_style; resetcvar score_hud_show_prestige; resetcvar score_hud_font_size; resetcvar score_hud_scale; resetcvar score_hud_corner; resetcvar score_hud_right_margin; resetcvar score_hud_top_margin; resetcvar score_hud_line_spacing; resetcvar score_hud_color_score; resetcvar score_hud_color_next; resetcvar score_hud_color_rank; resetcvar score_hud_color_combo; resetcvar score_hud_color_style; resetcvar score_hud_color_prestige; resetcvar score_killfeed_show; resetcvar score_killfeed_show_weapon; resetcvar score_killfeed_corner; resetcvar score_killfeed_lines; resetcvar score_killfeed_duration_tics; resetcvar score_killfeed_font_size; resetcvar score_killfeed_scale; resetcvar score_killfeed_right_margin; resetcvar score_killfeed_top_margin; resetcvar score_killfeed_color_1; resetcvar score_killfeed_color_2; resetcvar score_killfeed_color_3; resetcvar score_killfeed_color_4; resetcvar score_killfeed_color_5; resetcvar score_killfeed_color_6; resetcvar score_killfeed_color_7; resetcvar score_killfeed_color_8; resetcvar score_killfeed_color_9; resetcvar score_killfeed_color_10; resetcvar score_show_reward_gain; resetcvar score_log_score_events; resetcvar score_show_endmap_summary; resetcvar score_rankup_sound; resetcvar score_newrecord_sound; resetcvar score_sound_kills100; resetcvar score_sound_items100; resetcvar score_sound_secrets100"
+}
+
+OptionMenu "ScoreRankBookMenu"
+{
+    Title "Rank Book (80)"
+    StaticText "Threshold formulas:"
+    StaticText "Normal: 110*R*R + 850*R"
+    StaticText "Fast: 78*R*R + 620*R"
+    StaticText "Hardcore: 220*R*R + 1600*R"
+    StaticText "R = rank index (1..79)"
+    StaticText " "
+    StaticText "R00 Recruit"
+    StaticText "R01 Scout"
+    StaticText "R02 Trooper"
+    StaticText "R03 Hunter"
+    StaticText "R04 Stalker"
+    StaticText "R05 Slayer"
+    StaticText "R06 Butcher"
+    StaticText "R07 Reaper"
+    StaticText "R08 Ravager"
+    StaticText "R09 Warlord"
+    StaticText "R10 Overkiller"
+    StaticText "R11 Exterminator"
+    StaticText "R12 Nightbane"
+    StaticText "R13 Dreadnought"
+    StaticText "R14 Hellbreaker"
+    StaticText "R15 Doombringer"
+    StaticText "R16 Annihilator"
+    StaticText "R17 Harbinger"
+    StaticText "R18 Cataclysm"
+    StaticText "R19 DoomLord"
+    StaticText "R20 Apex Doom"
+    StaticText "R21 Infernal Apex"
+    StaticText "R22 Eternal Slayer"
+    StaticText "R23 Mythic Reaper"
+    StaticText "R24 Omega Exec"
+    StaticText "R25 God Carnage"
+    StaticText "R26 Planetbreaker"
+    StaticText "R27 End of Hell"
+    StaticText "R28 Prime Doom"
+    StaticText "R29 Eternal Prime"
+    StaticText "R30 Unholy Legend"
+    StaticText "R31 Final Judg."
+    StaticText "R32 Armageddon"
+    StaticText "R33 Doom Eternal"
+    StaticText "R34 Chaos Monarch"
+    StaticText "R35 Absolute Doom"
+    StaticText "R36 Void Herald"
+    StaticText "R37 Rift Hunter"
+    StaticText "R38 Abyss Walker"
+    StaticText "R39 Hell Marshal"
+    StaticText "R40 Inferno Warden"
+    StaticText "R41 Catastrophe King"
+    StaticText "R42 Nether Tyrant"
+    StaticText "R43 Doom Vanguard"
+    StaticText "R44 Eclipse Reaper"
+    StaticText "R45 Starbreaker"
+    StaticText "R46 Oblivion Knight"
+    StaticText "R47 Apex Harrower"
+    StaticText "R48 Thunder Scourge"
+    StaticText "R49 Dread Emperor"
+    StaticText "R50 Ruin Architect"
+    StaticText "R51 Infernal Regent"
+    StaticText "R52 Nightmare Crown"
+    StaticText "R53 Rift Sovereign"
+    StaticText "R54 Chaos Executor"
+    StaticText "R55 Hell Dominion"
+    StaticText "R56 Endless Wrath"
+    StaticText "R57 Doom Oracle"
+    StaticText "R58 Quantum Butcher"
+    StaticText "R59 Crimson Nemesis"
+    StaticText "R60 Omega Sovereign"
+    StaticText "R61 Titan Ravager"
+    StaticText "R62 Cosmic Reaper"
+    StaticText "R63 Catacomb King"
+    StaticText "R64 Final Eclipse"
+    StaticText "R65 Eternal Overlord"
+    StaticText "R66 Doom Ascendant"
+    StaticText "R67 Empyreal Slayer"
+    StaticText "R68 Void Monarch"
+    StaticText "R69 Astral Doom"
+    StaticText "R70 Oblivion Prime"
+    StaticText "R71 Celestial Tyrant"
+    StaticText "R72 Ultra Cataclysm"
+    StaticText "R73 Apex Transcendent"
+    StaticText "R74 Beyond Ruin"
+    StaticText "R75 Singularity Lord"
+    StaticText "R76 Infinity Reaper"
+    StaticText "R77 Last Harbinger"
+    StaticText "R78 Supreme Doom"
+    StaticText "R79 Transcendent"
+}
+
+
