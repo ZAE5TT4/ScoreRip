@@ -14,6 +14,7 @@ server int score_style_multikill_window_tics = 70;
 server int score_style_multikill_bonus2 = 10;
 server int score_style_multikill_bonus3 = 20;
 server int score_style_multikill_bonus4 = 35;
+server int score_style_barrel_bonus_percent = 30;
 
 server bool score_penalty_on_death = true;
 server int score_death_penalty = 320;
@@ -77,5 +78,6 @@ user bool score_sound_secrets100 = true;
 
 user bool score_hud_show_prestige = true;
 user bool score_show_endmap_summary = true;
+user bool score_prestige_enabled = true;
 
 

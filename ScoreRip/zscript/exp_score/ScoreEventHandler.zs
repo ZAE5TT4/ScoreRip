@@ -15,6 +15,9 @@ class EXPScoreEventHandler : EventHandler
     private int playerMultiKillCount[MAXPLAYERS];
     private int playerMultiKillExpireTic[MAXPLAYERS];
     private int playerLastWeaponStyleTic[MAXPLAYERS];
+    private Actor trackedBarrelActors[128];
+    private int trackedBarrelOwners[128];
+    private int trackedBarrelExpireTics[128];
 
     private bool mapKillBonusGiven[MAXPLAYERS];
     private bool mapSecretBonusGiven[MAXPLAYERS];
@@ -106,8 +109,9 @@ class EXPScoreEventHandler : EventHandler
 
     override void WorldThingDamaged(WorldEvent e)
     {
-        PlayerPawn victim = TryGetOwningPlayerPawn(e.Thing);
-        if (victim == null)
+        RegisterBarrelActivatorFromDamage(e);
+        PlayerPawn victim = PlayerPawn(e.Thing);
+        if (victim == null || victim.player == null)
         {
             return;
         }
@@ -184,9 +188,10 @@ class EXPScoreEventHandler : EventHandler
         Name currentWeaponClass = GetReadyWeaponClass(killer);
         UpdateWeaponStyleState(playerNumber, currentWeaponClass);
         UpdateMultiKillState(playerNumber);
+        bool barrelStyleKill = IsBarrelStyleKill(e, playerNumber);
 
         int comboPercent = GetComboPercent(playerNumber);
-        int stylePercent = GetStylePercent(killer, e.Thing, playerNumber, currentWeaponClass);
+        int stylePercent = GetStylePercent(killer, e.Thing, playerNumber, currentWeaponClass, barrelStyleKill);
         stylePercent = SmoothStyleTransition(playerNumber, stylePercent);
 
         int points = EXPScoreRules.GetScoreForKill(e.Thing, killer, comboPercent, stylePercent);
@@ -215,7 +220,7 @@ class EXPScoreEventHandler : EventHandler
         GrantPendingRewards(killer, playerNumber);
         CheckPrestigeProgress(killer, playerNumber);
         NotifyRankUp(playerNumber, oldScore, GetScore(killer));
-        PushKillFeedEntry(playerNumber, killer, e.Thing, points);
+        PushKillFeedEntry(playerNumber, killer, e.Thing, points, barrelStyleKill);
 
         UpdateLevelSnapshots();
         CheckMapBonusesForPlayer(killer, playerNumber);
@@ -347,7 +352,7 @@ class EXPScoreEventHandler : EventHandler
             bool showRank = GetUserBoolUI('score_hud_show_rank', true);
             bool showCombo = GetUserBoolUI('score_hud_show_combo', true);
             bool showStyle = GetUserBoolUI('score_hud_show_style', true);
-            bool showPrestige = GetUserBoolUI('score_hud_show_prestige', true);
+            bool showPrestige = GetUserBoolUI('score_hud_show_prestige', true) && GetUserBoolUI('score_prestige_enabled', true);
 
             int lineCount = 1;
             if (showNext) { lineCount++; }
@@ -565,7 +570,7 @@ class EXPScoreEventHandler : EventHandler
         if (GetUserBoolUI('score_hud_show_rank', true)) { lineCount++; }
         if (GetUserBoolUI('score_hud_show_combo', true)) { lineCount++; }
         if (GetUserBoolUI('score_hud_show_style', true)) { lineCount++; }
-        if (GetUserBoolUI('score_hud_show_prestige', true)) { lineCount++; }
+        if (GetUserBoolUI('score_hud_show_prestige', true) && GetUserBoolUI('score_prestige_enabled', true)) { lineCount++; }
 
         double hudScale = GetUIScaleUI('score_hud_scale', 100);
         return int(((lineCount * lineStep) + 8) * hudScale + 0.5);
@@ -591,6 +596,7 @@ class EXPScoreEventHandler : EventHandler
         recordMapNames.Clear();
         recordMapBestGain.Clear();
         ClearKillFeed();
+        ClearTrackedBarrelOwners();
     }
 
     private void ResetMapRuntime(bool clearSummary)
@@ -632,6 +638,7 @@ class EXPScoreEventHandler : EventHandler
         mapLevelTimeSnapshot = level.time;
         lastFoundSecretsCount = level.found_secrets;
         ClearKillFeed();
+        ClearTrackedBarrelOwners();
     }
 
     private void ResetPlayerRuntime(int playerNumber)
@@ -901,7 +908,7 @@ class EXPScoreEventHandler : EventHandler
         EndScaleTransformUI();
     }
 
-    private void PushKillFeedEntry(int playerNumber, PlayerPawn killer, Actor victim, int points)
+    private void PushKillFeedEntry(int playerNumber, PlayerPawn killer, Actor victim, int points, bool barrelStyleKill)
     {
         if (!IsValidPlayerNumber(playerNumber) || points <= 0)
         {
@@ -916,8 +923,19 @@ class EXPScoreEventHandler : EventHandler
 
         String victimName = EXPScoreRules.GetEnemyDisplayName(victim);
         String weaponName = EXPScoreRules.GetWeaponDisplayName(killer);
-        String lineWithWeapon = String.Format("P%d %s -> %s +%d", playerNumber + 1, weaponName, victimName, points);
-        String lineNoWeapon = String.Format("P%d %s +%d", playerNumber + 1, victimName, points);
+        String lineWithWeapon;
+        String lineNoWeapon;
+
+        if (barrelStyleKill)
+        {
+            lineWithWeapon = String.Format("P%d %s > Barrel -> %s +%d", playerNumber + 1, weaponName, victimName, points);
+            lineNoWeapon = String.Format("P%d Barrel -> %s +%d", playerNumber + 1, victimName, points);
+        }
+        else
+        {
+            lineWithWeapon = String.Format("P%d %s -> %s +%d", playerNumber + 1, weaponName, victimName, points);
+            lineNoWeapon = String.Format("P%d %s +%d", playerNumber + 1, victimName, points);
+        }
 
         if (combo > 1)
         {
@@ -1179,7 +1197,7 @@ class EXPScoreEventHandler : EventHandler
         return result;
     }
 
-    private int GetStylePercent(PlayerPawn killer, Actor victim, int playerNumber, Name currentWeaponClass)
+    private int GetStylePercent(PlayerPawn killer, Actor victim, int playerNumber, Name currentWeaponClass, bool barrelStyleKill)
     {
         int stylePercent = 100;
 
@@ -1200,6 +1218,11 @@ class EXPScoreEventHandler : EventHandler
         if (score_nohit_bonus_percent > 0 && playerNoHitKills[playerNumber] >= noHitNeed)
         {
             stylePercent += score_nohit_bonus_percent;
+        }
+
+        if (barrelStyleKill && score_style_barrel_bonus_percent > 0)
+        {
+            stylePercent += score_style_barrel_bonus_percent;
         }
 
         if (score_style_weapon_swap_bonus_percent > 0 && playerWeaponSwapThisKill[playerNumber])
@@ -1764,6 +1787,11 @@ class EXPScoreEventHandler : EventHandler
             return;
         }
 
+        if (!GetUserBoolPlay(playerNumber, 'score_prestige_enabled', true))
+        {
+            return;
+        }
+
         int requirement = EXPScoreRules.GetPrestigeRequirement();
         if (requirement <= 0)
         {
@@ -1849,6 +1877,180 @@ class EXPScoreEventHandler : EventHandler
         return cv.GetBool();
     }
 
+    private PlayerPawn GetPlayerPawnByNumber(int playerNumber)
+    {
+        if (!IsValidPlayerNumber(playerNumber) || !PlayerInGame[playerNumber])
+        {
+            return null;
+        }
+
+        return PlayerPawn(players[playerNumber].mo);
+    }
+
+    private void RegisterBarrelActivatorFromDamage(WorldEvent e)
+    {
+        if (e.Thing == null || !IsTrackedBarrelActor(e.Thing))
+        {
+            return;
+        }
+
+        PlayerPawn activator = TryGetOwningPlayerPawn(e.DamageSource);
+        if (activator == null)
+        {
+            activator = TryGetOwningPlayerPawn(e.Inflictor);
+        }
+
+        if (activator == null)
+        {
+            return;
+        }
+
+        int playerNumber = activator.PlayerNumber();
+        if (!IsValidPlayerNumber(playerNumber))
+        {
+            return;
+        }
+
+        RegisterTrackedBarrelOwner(e.Thing, playerNumber);
+    }
+
+    private bool IsTrackedBarrelActor(Actor thing)
+    {
+        if (thing == null)
+        {
+            return false;
+        }
+
+        String className = String.Format("%s", thing.GetClassName()).MakeLower();
+        return thing is "ExplosiveBarrel" || className.IndexOf("barrel") >= 0;
+    }
+
+    private void RegisterTrackedBarrelOwner(Actor barrel, int playerNumber)
+    {
+        if (barrel == null || !IsValidPlayerNumber(playerNumber))
+        {
+            return;
+        }
+
+        int emptySlot = -1;
+        int expireTic = level.time + (35 * 8);
+        for (int i = 0; i < 128; i++)
+        {
+            if (trackedBarrelActors[i] == barrel)
+            {
+                trackedBarrelOwners[i] = playerNumber;
+                trackedBarrelExpireTics[i] = expireTic;
+                return;
+            }
+
+            if (emptySlot < 0 && (trackedBarrelActors[i] == null || trackedBarrelExpireTics[i] < level.time))
+            {
+                emptySlot = i;
+            }
+        }
+
+        if (emptySlot >= 0)
+        {
+            trackedBarrelActors[emptySlot] = barrel;
+            trackedBarrelOwners[emptySlot] = playerNumber;
+            trackedBarrelExpireTics[emptySlot] = expireTic;
+        }
+    }
+
+    private void ClearTrackedBarrelOwners()
+    {
+        for (int i = 0; i < 128; i++)
+        {
+            trackedBarrelActors[i] = null;
+            trackedBarrelOwners[i] = -1;
+            trackedBarrelExpireTics[i] = 0;
+        }
+    }
+
+    private int GetTrackedBarrelOwner(Actor source)
+    {
+        if (source == null)
+        {
+            return -1;
+        }
+
+        for (int i = 0; i < 128; i++)
+        {
+            if (trackedBarrelActors[i] == null)
+            {
+                continue;
+            }
+
+            if (trackedBarrelExpireTics[i] < level.time)
+            {
+                trackedBarrelActors[i] = null;
+                trackedBarrelOwners[i] = -1;
+                trackedBarrelExpireTics[i] = 0;
+                continue;
+            }
+
+            if (trackedBarrelActors[i] == source)
+            {
+                return trackedBarrelOwners[i];
+            }
+        }
+
+        return -1;
+    }
+
+    private bool IsPlayerOwnedBarrelSource(Actor source, int playerNumber)
+    {
+        if (!IsValidPlayerNumber(playerNumber) || source == null)
+        {
+            return false;
+        }
+
+        if (GetTrackedBarrelOwner(source) == playerNumber)
+        {
+            return true;
+        }
+
+        if (source.master != null && GetTrackedBarrelOwner(source.master) == playerNumber)
+        {
+            return true;
+        }
+
+        if (source.tracer != null && GetTrackedBarrelOwner(source.tracer) == playerNumber)
+        {
+            return true;
+        }
+
+        if (source.target != null && GetTrackedBarrelOwner(source.target) == playerNumber)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsBarrelStyleKill(WorldEvent e, int playerNumber)
+    {
+        if (!IsValidPlayerNumber(playerNumber))
+        {
+            return false;
+        }
+
+        if (IsPlayerOwnedBarrelSource(e.DamageSource, playerNumber) || IsPlayerOwnedBarrelSource(e.Inflictor, playerNumber))
+        {
+            return true;
+        }
+
+        if (e.Thing != null)
+        {
+            if (IsPlayerOwnedBarrelSource(e.Thing.DamageSource, playerNumber) || IsPlayerOwnedBarrelSource(e.Thing.target, playerNumber))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private PlayerPawn ResolvePlayerKiller(WorldEvent e)
     {
 
@@ -1903,6 +2105,30 @@ class EXPScoreEventHandler : EventHandler
         if (source.tracer != null && source.tracer.player != null)
         {
             return PlayerPawn(source.tracer);
+        }
+
+        PlayerPawn barrelOwner = GetPlayerPawnByNumber(GetTrackedBarrelOwner(source));
+        if (barrelOwner != null)
+        {
+            return barrelOwner;
+        }
+
+        barrelOwner = GetPlayerPawnByNumber(GetTrackedBarrelOwner(source.master));
+        if (barrelOwner != null)
+        {
+            return barrelOwner;
+        }
+
+        barrelOwner = GetPlayerPawnByNumber(GetTrackedBarrelOwner(source.tracer));
+        if (barrelOwner != null)
+        {
+            return barrelOwner;
+        }
+
+        barrelOwner = GetPlayerPawnByNumber(GetTrackedBarrelOwner(source.target));
+        if (barrelOwner != null)
+        {
+            return barrelOwner;
         }
 
         String sourceClass = String.Format("%s", source.GetClassName()).MakeLower();
@@ -2100,3 +2326,4 @@ class EXPScoreEventHandler : EventHandler
         return 0;
     }
 }
+
