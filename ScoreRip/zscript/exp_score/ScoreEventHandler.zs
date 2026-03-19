@@ -209,6 +209,7 @@ class EXPScoreEventHandler : EventHandler
             return;
         }
         mapKillsByPlayer[playerNumber]++;
+        PlaySSSRankSoundIfNeeded(killer, playerNumber, prevStylePercent, stylePercent);
         playerLastStylePercent[playerNumber] = stylePercent;
         ApplyScoreDelta(killer, playerNumber, points, "");
         GrantPendingRewards(killer, playerNumber);
@@ -1284,6 +1285,27 @@ class EXPScoreEventHandler : EventHandler
         return computedStyle;
     }
 
+    private play void PlaySSSRankSoundIfNeeded(PlayerPawn player, int playerNumber, int prevStylePercent, int newStylePercent)
+    {
+        if (player == null || !IsValidPlayerNumber(playerNumber))
+        {
+            return;
+        }
+
+        if (prevStylePercent >= 210 || newStylePercent < 210)
+        {
+            return;
+        }
+
+        if (!GetUserBoolPlay(playerNumber, 'score_sss_sound', true))
+        {
+            return;
+        }
+
+        int index = Random(0, 7);
+        player.A_StartSound(String.Format("score/sss%d", index), CHAN_AUTO, CHANF_UI|CHANF_LOCAL, 2.0, ATTN_NONE);
+    }
+
     private int GetMultiKillStyleBonus(int multiKillCount)
     {
         int b2 = score_style_multikill_bonus2;
@@ -1778,6 +1800,11 @@ class EXPScoreEventHandler : EventHandler
             if (GetUserBoolPlay(playerNumber, 'score_log_score_events', true))
             {
                 Console.Printf("P%d PRE %d\n", playerNumber + 1, playerPrestigeCache[playerNumber]);
+            }
+
+            if (GetUserBoolPlay(playerNumber, 'score_prestige_sound', true))
+            {
+                player.A_StartSound("score/prestige", CHAN_AUTO, CHANF_UI|CHANF_LOCAL, 2.0, ATTN_NONE);
             }
         }
     }

@@ -69,6 +69,8 @@ user bool score_log_score_events = true;
 
 user bool score_rankup_sound = true;
 user bool score_newrecord_sound = true;
+user bool score_prestige_sound = true;
+user bool score_sss_sound = true;
 user bool score_sound_kills100 = true;
 user bool score_sound_items100 = true;
 user bool score_sound_secrets100 = true;

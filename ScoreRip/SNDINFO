@@ -1,6 +1,15 @@
-﻿score/newrank sounds/NEWRANK.ogg
+score/newrank sounds/NEWRANK.ogg
 score/newrecord sounds/NEWRECORD.ogg
 score/kills100 sounds/100KILLS.ogg
 score/items100 sounds/100ITEMS.ogg
 score/secrets100 sounds/100SECRETS.ogg
 
+score/prestige sounds/prestige/Ascended.ogg
+score/sss0 sounds/sss/Brutal.ogg
+score/sss1 sounds/sss/Carnage.ogg
+score/sss2 sounds/sss/Dominating.ogg
+score/sss3 sounds/sss/Excellent.ogg
+score/sss4 sounds/sss/Godlike.ogg
+score/sss5 sounds/sss/Massacre.ogg
+score/sss6 sounds/sss/Overkill.ogg
+score/sss7 sounds/sss/Untouchable.ogg
