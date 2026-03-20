@@ -13,3 +13,7 @@ score/sss4 sounds/sss/Godlike.ogg
 score/sss5 sounds/sss/Massacre.ogg
 score/sss6 sounds/sss/Overkill.ogg
 score/sss7 sounds/sss/Untouchable.ogg
+
+score/shop/buy    sounds/shop/buyS.ogg
+score/shop/exit   sounds/shop/exitS.ogg
+score/shop/choice sounds/shop/choiceS.ogg

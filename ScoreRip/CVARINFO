@@ -83,6 +83,5 @@ user bool score_sound_secrets100 = true;
 user bool score_hud_show_prestige = true;
 user bool score_show_endmap_summary = true;
 user bool score_prestige_enabled = true;
-
-
-
+user bool score_shop_shader_enable = true;
+user bool score_shop_sounds_enable = true;
