@@ -65,6 +65,10 @@ user int score_killfeed_color_8 = 3;
 user int score_killfeed_color_9 = 3;
 user int score_killfeed_color_10 = 3;
 
+user bool score_shop_enabled = true;
+user int score_shop_panel_alpha = 55;
+user int score_shop_rows = 12;
+
 user bool score_show_reward_gain = true;
 user bool score_log_score_events = true;
 
@@ -79,5 +83,6 @@ user bool score_sound_secrets100 = true;
 user bool score_hud_show_prestige = true;
 user bool score_show_endmap_summary = true;
 user bool score_prestige_enabled = true;
+
 
 

@@ -103,6 +103,7 @@ class EXPScoreEventHandler : EventHandler
                 ApplyQueuedScore(player, e.PlayerNumber);
                 mapStartScore[e.PlayerNumber] = GetScore(player);
                 mapBestComboByPlayer[e.PlayerNumber] = 1;
+                RegisterPlayerShopInventory(e.PlayerNumber);
             }
         }
     }
@@ -279,7 +280,9 @@ class EXPScoreEventHandler : EventHandler
             return;
         }
 
-        if (hasLivePlayer && GetUserBoolUI('score_hud_show', true))
+        bool shopOpen = IsShopOpenUI(playerNumber);
+
+        if (!shopOpen && hasLivePlayer && GetUserBoolUI('score_hud_show', true))
         {
             int score = playerScoreCache[playerNumber];
             int tier = playerTierCache[playerNumber];
@@ -421,9 +424,14 @@ class EXPScoreEventHandler : EventHandler
             EndScaleTransformUI();
         }
 
-        if (hasLivePlayer && GetUserBoolUI('score_killfeed_show', true))
+        if (!shopOpen && hasLivePlayer && GetUserBoolUI('score_killfeed_show', true))
         {
             DrawKillFeed();
+        }
+
+        if (shopOpen)
+        {
+            DrawShopOverlayUI(playerNumber);
         }
 
     }
@@ -595,6 +603,7 @@ class EXPScoreEventHandler : EventHandler
 
         recordMapNames.Clear();
         recordMapBestGain.Clear();
+        ResetShopAllRuntime();
         ClearKillFeed();
         ClearTrackedBarrelOwners();
     }
@@ -637,6 +646,7 @@ class EXPScoreEventHandler : EventHandler
         mapFoundItemsSnapshot = level.found_items;
         mapLevelTimeSnapshot = level.time;
         lastFoundSecretsCount = level.found_secrets;
+        ResetShopMapRuntime();
         ClearKillFeed();
         ClearTrackedBarrelOwners();
     }
@@ -658,6 +668,7 @@ class EXPScoreEventHandler : EventHandler
         playerMultiKillCount[playerNumber] = 0;
         playerMultiKillExpireTic[playerNumber] = 0;
         playerLastWeaponStyleTic[playerNumber] = -1;
+        ResetShopPlayerRuntime(playerNumber);
         ResetPlayerCombatState(playerNumber);
     }
 
@@ -2326,4 +2337,7 @@ class EXPScoreEventHandler : EventHandler
         return 0;
     }
 }
+
+
+
 

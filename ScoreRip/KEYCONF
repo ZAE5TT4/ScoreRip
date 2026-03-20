@@ -1,0 +1,5 @@
+addkeysection "ScoreRip Shop" ScoreRipShopActions
+
+addmenukey "Open Score Shop" score_shop_toggle
+alias score_shop_toggle "netevent scorerip_shop_toggle"
+defaultbind o score_shop_toggle

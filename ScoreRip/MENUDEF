@@ -50,6 +50,9 @@ OptionMenu "ScoreModOptions"
 {
     Title "Score Mod Options"
 
+    StaticText "-- Shop Controls --"
+    Control "Open Score Shop", "score_shop_toggle"
+    StaticText " "
     StaticText "-- Progression --"
     Option "Rank Progression", "score_rank_preset", "ScoreRankPreset"
     Slider "Per Secret Bonus", "score_secret_found_bonus", 0, 1500, 25
@@ -126,6 +129,11 @@ OptionMenu "ScoreModOptions"
     Option "Feed Line 10 Color", "score_killfeed_color_10", "ScoreTextColor"
     StaticText " "
 
+    StaticText "-- Shop --"
+    Option "Enable Score Shop", "score_shop_enabled", "ScoreOnOff"
+    Slider "Shop Panel Alpha", "score_shop_panel_alpha", 0, 100, 5
+    Slider "Shop Visible Rows", "score_shop_rows", 4, 16, 1
+    StaticText " "
     StaticText "-- Feedback --"
     Option "Show Rank Reward Gain", "score_show_reward_gain", "ScoreOnOff"
     Option "Console Mod Messages", "score_log_score_events", "ScoreOnOff"
@@ -140,7 +148,7 @@ OptionMenu "ScoreModOptions"
     Option "100% Items Sound", "score_sound_items100", "ScoreOnOff"
     Option "100% Secrets Sound", "score_sound_secrets100", "ScoreOnOff"
     StaticText " "
-    SafeCommand "Reset Score Settings", "resetcvar score_rank_preset; resetcvar score_secret_found_bonus; resetcvar score_bonus_kills100; resetcvar score_bonus_secrets100; resetcvar score_bonus_items100; resetcvar score_close_range_distance; resetcvar score_close_range_bonus_percent; resetcvar score_nohit_kills; resetcvar score_nohit_bonus_percent; resetcvar score_style_weapon_swap_bonus_percent; resetcvar score_style_repeat_start_kill; resetcvar score_style_repeat_penalty_step; resetcvar score_style_repeat_penalty_max; resetcvar score_style_multikill_window_tics; resetcvar score_style_multikill_bonus2; resetcvar score_style_multikill_bonus3; resetcvar score_style_multikill_bonus4; resetcvar score_style_barrel_bonus_percent; resetcvar score_ui_use_global_corner; resetcvar score_ui_corner; resetcvar score_hud_show; resetcvar score_hud_show_next; resetcvar score_hud_show_rank; resetcvar score_hud_show_combo; resetcvar score_hud_show_style; resetcvar score_hud_show_prestige; resetcvar score_hud_font_size; resetcvar score_hud_scale; resetcvar score_hud_corner; resetcvar score_hud_right_margin; resetcvar score_hud_top_margin; resetcvar score_hud_line_spacing; resetcvar score_hud_color_score; resetcvar score_hud_color_next; resetcvar score_hud_color_rank; resetcvar score_hud_color_combo; resetcvar score_hud_color_style; resetcvar score_hud_color_prestige; resetcvar score_killfeed_show; resetcvar score_killfeed_show_weapon; resetcvar score_killfeed_corner; resetcvar score_killfeed_lines; resetcvar score_killfeed_duration_tics; resetcvar score_killfeed_font_size; resetcvar score_killfeed_scale; resetcvar score_killfeed_right_margin; resetcvar score_killfeed_top_margin; resetcvar score_killfeed_color_1; resetcvar score_killfeed_color_2; resetcvar score_killfeed_color_3; resetcvar score_killfeed_color_4; resetcvar score_killfeed_color_5; resetcvar score_killfeed_color_6; resetcvar score_killfeed_color_7; resetcvar score_killfeed_color_8; resetcvar score_killfeed_color_9; resetcvar score_killfeed_color_10; resetcvar score_show_reward_gain; resetcvar score_log_score_events; resetcvar score_show_endmap_summary; resetcvar score_prestige_enabled; resetcvar score_rankup_sound; resetcvar score_newrecord_sound; resetcvar score_prestige_sound; resetcvar score_sss_sound; resetcvar score_sound_kills100; resetcvar score_sound_items100; resetcvar score_sound_secrets100"
+    SafeCommand "Reset Score Settings", "resetcvar score_rank_preset; resetcvar score_secret_found_bonus; resetcvar score_bonus_kills100; resetcvar score_bonus_secrets100; resetcvar score_bonus_items100; resetcvar score_close_range_distance; resetcvar score_close_range_bonus_percent; resetcvar score_nohit_kills; resetcvar score_nohit_bonus_percent; resetcvar score_style_weapon_swap_bonus_percent; resetcvar score_style_repeat_start_kill; resetcvar score_style_repeat_penalty_step; resetcvar score_style_repeat_penalty_max; resetcvar score_style_multikill_window_tics; resetcvar score_style_multikill_bonus2; resetcvar score_style_multikill_bonus3; resetcvar score_style_multikill_bonus4; resetcvar score_style_barrel_bonus_percent; resetcvar score_shop_enabled; resetcvar score_shop_panel_alpha; resetcvar score_shop_rows; resetcvar score_ui_use_global_corner; resetcvar score_ui_corner; resetcvar score_hud_show; resetcvar score_hud_show_next; resetcvar score_hud_show_rank; resetcvar score_hud_show_combo; resetcvar score_hud_show_style; resetcvar score_hud_show_prestige; resetcvar score_hud_font_size; resetcvar score_hud_scale; resetcvar score_hud_corner; resetcvar score_hud_right_margin; resetcvar score_hud_top_margin; resetcvar score_hud_line_spacing; resetcvar score_hud_color_score; resetcvar score_hud_color_next; resetcvar score_hud_color_rank; resetcvar score_hud_color_combo; resetcvar score_hud_color_style; resetcvar score_hud_color_prestige; resetcvar score_killfeed_show; resetcvar score_killfeed_show_weapon; resetcvar score_killfeed_corner; resetcvar score_killfeed_lines; resetcvar score_killfeed_duration_tics; resetcvar score_killfeed_font_size; resetcvar score_killfeed_scale; resetcvar score_killfeed_right_margin; resetcvar score_killfeed_top_margin; resetcvar score_killfeed_color_1; resetcvar score_killfeed_color_2; resetcvar score_killfeed_color_3; resetcvar score_killfeed_color_4; resetcvar score_killfeed_color_5; resetcvar score_killfeed_color_6; resetcvar score_killfeed_color_7; resetcvar score_killfeed_color_8; resetcvar score_killfeed_color_9; resetcvar score_killfeed_color_10; resetcvar score_show_reward_gain; resetcvar score_log_score_events; resetcvar score_show_endmap_summary; resetcvar score_prestige_enabled; resetcvar score_rankup_sound; resetcvar score_newrecord_sound; resetcvar score_prestige_sound; resetcvar score_sss_sound; resetcvar score_sound_kills100; resetcvar score_sound_items100; resetcvar score_sound_secrets100"
 }
 
 OptionMenu "ScoreRankBookMenu"
@@ -233,5 +241,6 @@ OptionMenu "ScoreRankBookMenu"
     StaticText "R78 Supreme Doom"
     StaticText "R79 Transcendent"
 }
+
 
 
