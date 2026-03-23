@@ -1,4 +1,4 @@
-class EXPScoreEventHandler : EventHandler
+﻿class EXPScoreEventHandler : EventHandler
 {
     private int playerScoreCache[MAXPLAYERS];
     private int playerTierCache[MAXPLAYERS];
@@ -103,6 +103,7 @@ class EXPScoreEventHandler : EventHandler
                 ApplyQueuedScore(player, e.PlayerNumber);
                 mapStartScore[e.PlayerNumber] = GetScore(player);
                 mapBestComboByPlayer[e.PlayerNumber] = 1;
+                PrimeShopCatalogOnce();
                 RegisterPlayerShopInventory(e.PlayerNumber);
             }
         }
@@ -235,6 +236,7 @@ class EXPScoreEventHandler : EventHandler
             return;
         }
         CheckSecretDiscoveryBonuses();
+        TickShopCatalogQueue();
 
         for (int i = 0; i < MAXPLAYERS; i++)
         {
@@ -2337,6 +2339,8 @@ class EXPScoreEventHandler : EventHandler
         return 0;
     }
 }
+
+
 
 
 
