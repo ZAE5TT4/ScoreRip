@@ -1,4 +1,4 @@
-﻿extend class EXPScoreEventHandler
+extend class EXPScoreEventHandler
 {
     private Array<Name> shopItemTypes;
     private Array<String> shopItemDisplayNames;
@@ -64,9 +64,8 @@
             Array<String> parts;
             entries[i].Split(parts, "~", TOK_SKIPEMPTY);
             if (parts.Size() < 3) { continue; }
-            class<Inventory> cls = (class<Inventory>)(parts[0]);
-            if (cls == null) { continue; }
-            Name itemType = cls.GetClassName();
+            if (!EXPScoreShopRules.IsShopCandidateClassName(parts[0])) { continue; }
+            Name itemType = parts[0];
             if (itemType == 'None') { continue; }
             bool already = false;
             for (int j = 0; j < shopItemTypes.Size(); j++)
@@ -78,7 +77,7 @@
             int price = parts[2].ToInt();
             if (price < 1) { price = 1; }
             shopItemTypes.Push(itemType);
-            shopItemDisplayNames.Push(parts[0]);
+            shopItemDisplayNames.Push(EXPScoreShopRules.GetDisplayNameFromClassName(parts[0]));
             shopItemCategories.Push(cat);
             shopItemPrices.Push(price);
         }
@@ -405,6 +404,7 @@
         }
 
         RefreshShopCatalogForPlayer(playerNumber);
+        EnsureShopSpecialsReady();
         shopOpen[playerNumber] = true;
         shopOpenTic[playerNumber] = level.time;
         IsUiProcessor = true;
@@ -450,6 +450,7 @@
         {
             return;
         }
+        TryAssignEliteMonster(e.Thing);
         QueueShopCatalogThing(e.Thing);
     }
     private play void RefreshShopCatalogForPlayer(int playerNumber)
@@ -625,7 +626,16 @@
             clsLow == "manaitem"      ||
             clsLow == "weaponpiece"   ||
             clsLow == "weaponholder"  ||
-            clsLow == "fakeinventory")
+            clsLow == "fakeinventory" ||
+            clsLow == "gauntlets"     ||
+            clsLow == "mace"          ||
+            clsLow == "goldwand"      ||
+            clsLow == "crossbow"      ||
+            clsLow == "blaster"       ||
+            clsLow == "skullrod"      ||
+            clsLow == "phoenixrod"    ||
+            clsLow == "fweapfist"     ||
+            clsLow == "mweapwand")
         {
             return;
         }
@@ -699,7 +709,7 @@
         }
 
         if (catalogIndex >= shopItemPrices.Size() || catalogIndex >= shopItemTypes.Size()) { return; }
-        int price = shopItemPrices[catalogIndex];
+        int price = GetShopPriceForCatalogIndex(catalogIndex);
         int score = GetScore(player);
         String displayName = shopItemDisplayNames[catalogIndex];
         Name itemType = shopItemTypes[catalogIndex];
@@ -1286,10 +1296,11 @@
 
                 if (catalogIndex >= shopItemDisplayNames.Size()) { break; }
                 String itemName   = shopItemDisplayNames[catalogIndex];
-                int    itemPrice  = shopItemPrices[catalogIndex];
+                int    itemPrice  = GetShopPriceForCatalogIndexUI(catalogIndex);
+                int    specialPct = GetShopSpecialDiscountForCatalogIndexUI(catalogIndex);
                 bool   canAfford  = (playerScoreCache[playerNumber] >= itemPrice);
-                String priceText  = String.Format("%d", itemPrice);
-                int    priceColor = canAfford ? greenColor : redColor;
+                String priceText  = specialPct > 0 ? String.Format("%d -%d%%", itemPrice, specialPct) : String.Format("%d", itemPrice);
+                int    priceColor = specialPct > 0 ? orangeColor : (canAfford ? greenColor : redColor);
                 int    priceW     = int(fnt.StringWidth(priceText) * sc);
                 int    priceX     = itemsX + itemsW - priceW - 14;
                 String rowNum     = String.Format("%d.", row + 1);

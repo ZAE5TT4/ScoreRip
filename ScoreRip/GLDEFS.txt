@@ -22,3 +22,11 @@ HardwareShader PostProcess Scene
     Uniform int shopOpen
     Uniform int shopCounter
 }
+
+PointLight score_elite_aura_light
+{
+    Color 1.0 0.08 0.08
+    Size 56
+    Offset 0 0 20
+}
+

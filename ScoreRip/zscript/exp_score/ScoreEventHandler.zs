@@ -1,4 +1,4 @@
-﻿class EXPScoreEventHandler : EventHandler
+class EXPScoreEventHandler : EventHandler
 {
     private int playerScoreCache[MAXPLAYERS];
     private int playerTierCache[MAXPLAYERS];
@@ -104,6 +104,7 @@
                 mapStartScore[e.PlayerNumber] = GetScore(player);
                 mapBestComboByPlayer[e.PlayerNumber] = 1;
                 PrimeShopCatalogOnce();
+                EnsureMapContractsReady();
                 RegisterPlayerShopInventory(e.PlayerNumber);
             }
         }
@@ -222,6 +223,7 @@
         GrantPendingRewards(killer, playerNumber);
         CheckPrestigeProgress(killer, playerNumber);
         NotifyRankUp(playerNumber, oldScore, GetScore(killer));
+        HandleAdvancedKill(killer, e.Thing, playerNumber, barrelStyleKill, stylePercent);
         PushKillFeedEntry(playerNumber, killer, e.Thing, points, barrelStyleKill);
 
         UpdateLevelSnapshots();
@@ -237,6 +239,8 @@
         }
         CheckSecretDiscoveryBonuses();
         TickShopCatalogQueue();
+        EnsureMapContractsReady();
+        UpdateEliteMonsterAuras();
 
         for (int i = 0; i < MAXPLAYERS; i++)
         {
@@ -253,6 +257,7 @@
             }
             CheckComboTimeout(i);
             CheckMapBonusesForPlayer(player, i);
+            CheckContractsForPlayer(player, i);
             SyncPlayerCaches(i);
         }
 
@@ -421,9 +426,16 @@
             if (showPrestige)
             {
                 DrawHudLine(hudFont, prestigeColor, xDraw, valueX, yDraw + (lineIndex * lineStep), "PRESTIGE", prestigeValue);
+                lineIndex++;
             }
 
             EndScaleTransformUI();
+        }
+
+        if (!shopOpen && hasLivePlayer)
+        {
+            DrawContractsUI(playerNumber);
+            DrawStyleEventsUI(playerNumber);
         }
 
         if (!shopOpen && hasLivePlayer && GetUserBoolUI('score_killfeed_show', true))
@@ -605,6 +617,7 @@
 
         recordMapNames.Clear();
         recordMapBestGain.Clear();
+        ResetAdvancedAllRuntime();
         ResetShopAllRuntime();
         ClearKillFeed();
         ClearTrackedBarrelOwners();
@@ -648,6 +661,7 @@
         mapFoundItemsSnapshot = level.found_items;
         mapLevelTimeSnapshot = level.time;
         lastFoundSecretsCount = level.found_secrets;
+        ResetAdvancedMapRuntime();
         ResetShopMapRuntime();
         ClearKillFeed();
         ClearTrackedBarrelOwners();
@@ -671,6 +685,7 @@
         playerMultiKillExpireTic[playerNumber] = 0;
         playerLastWeaponStyleTic[playerNumber] = -1;
         ResetShopPlayerRuntime(playerNumber);
+        ResetAdvancedPlayerRuntime(playerNumber);
         ResetPlayerCombatState(playerNumber);
     }
 
@@ -855,6 +870,13 @@
             }
         }
 
+        int playerNumber = GetUIPlayerNumber();
+        if (GetUserBoolUI('score_contracts_show', true) && GetCornerUI('score_contracts_corner') == corner)
+        {
+            hudReserved += GetContractsReservedHeightUI();
+        }
+
+
         int anchorX = isRight ? (Screen.GetWidth() - marginX) : marginX;
         if (anchorX < 0) { anchorX = 0; }
 
@@ -869,7 +891,7 @@
         }
 
         Font feedFont = GetKillFeedFontUI();
-        bool showWeapon = GetUserBoolUI('score_killfeed_show_weapon', true);
+        bool showWeapon = GetUserBoolUI('score_killfeed_show_weapon', false);
         double feedScale = GetUIScaleUI('score_killfeed_scale', 100);
         int printed = 0;
         int step = feedFont.GetHeight() + 1;
@@ -950,11 +972,6 @@
             lineNoWeapon = String.Format("P%d %s +%d", playerNumber + 1, victimName, points);
         }
 
-        if (combo > 1)
-        {
-            lineWithWeapon = String.Format("%s x%d", lineWithWeapon, combo);
-            lineNoWeapon = String.Format("%s x%d", lineNoWeapon, combo);
-        }
 
         PushKillFeedText(lineWithWeapon, lineNoWeapon);
     }
@@ -1027,16 +1044,16 @@
 
         if (GetUserBoolUI('score_ui_use_global_corner', true))
         {
-            corner = GetUserIntUI('score_ui_corner', 0);
+            corner = GetUserIntUI('score_ui_corner', 1);
         }
         else
         {
-            corner = GetUserIntUI(localCornerCvar, 0);
+            corner = GetUserIntUI(localCornerCvar, 1);
         }
 
         if (corner < 0 || corner > 3)
         {
-            corner = 0;
+            corner = 1;
         }
 
         return corner;

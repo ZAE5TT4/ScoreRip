@@ -1,9 +1,13 @@
-version "4.10"
+﻿version "4.10"
 
 #include "zscript/exp_score/ScoreStorage.zs"
 #include "zscript/exp_score/ScoreRules.zs"
 #include "zscript/exp_score/RewardRules.zs"
 #include "zscript/exp_score/ScoreShopRules.zs"
 #include "zscript/exp_score/ScoreEventHandler.zs"
+#include "zscript/exp_score/ScoreEliteAura.zs"
+#include "zscript/exp_score/ScoreAdvancedSystems.zs"
 #include "zscript/exp_score/ScoreShopExtension.zs"
 #include "zscript/exp_score/ScoreStatusScreen.zs"
+
+

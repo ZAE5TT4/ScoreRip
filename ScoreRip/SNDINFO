@@ -17,3 +17,6 @@ score/sss7 sounds/sss/Untouchable.ogg
 score/shop/buy    sounds/shop/buyS.ogg
 score/shop/exit   sounds/shop/exitS.ogg
 score/shop/choice sounds/shop/choiceS.ogg
+
+score/contracts/task     sounds/contracts/TasksC.ogg
+score/contracts/done     sounds/contracts/ContractsD.ogg

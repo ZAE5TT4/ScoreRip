@@ -1,8 +1,86 @@
 class EXPScoreShopRules : Object
 {
+    static bool HasValidShopPresentation(Inventory item)
+    {
+        if (item == null)
+        {
+            return false;
+        }
+
+        if (item.SpawnState == null || !item.SpawnState.ValidateSpriteFrame())
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    static bool IsForeignBuiltinItem(Inventory item, String clsText, String tagText)
+    {
+        if (item == null)
+        {
+            return false;
+        }
+
+        if (item is "HereticWeapon" || item is "FighterWeapon" || item is "ClericWeapon" || item is "MageWeapon")
+        {
+            return true;
+        }
+
+        if (item is "Mana1" || item is "Mana2" || item is "Mana3" || item is "ArtiBoostMana")
+        {
+            return true;
+        }
+
+        if (item is "GoldWandAmmo" || item is "GoldWandHefty" ||
+            item is "CrossbowAmmo" || item is "CrossbowHefty" ||
+            item is "MaceAmmo" || item is "MaceHefty" ||
+            item is "BlasterAmmo" || item is "BlasterHefty" ||
+            item is "SkullRodAmmo" || item is "SkullRodHefty" ||
+            item is "PhoenixRodAmmo" || item is "PhoenixRodHefty")
+        {
+            return true;
+        }
+
+        if (item is "Gauntlets" || item is "GoldWand" || item is "Crossbow" || item is "Mace" ||
+            item is "Blaster" || item is "SkullRod" || item is "PhoenixRod" || item is "FWeapFist" ||
+            item is "MWeapWand")
+        {
+            return true;
+        }
+
+        if (clsText == "hexenarmor" || clsText == "armoritem" || clsText == "weaponpiece" || clsText == "weaponholder")
+        {
+            return true;
+        }
+
+        if (clsText.IndexOf("goldwand") >= 0 || clsText.IndexOf("crossbow") >= 0 || clsText.IndexOf("skullrod") >= 0 ||
+            clsText.IndexOf("phoenixrod") >= 0 || clsText.IndexOf("blaster") >= 0 || clsText.IndexOf("maceammo") >= 0 ||
+            clsText.IndexOf("mana") >= 0 || clsText.IndexOf("gauntlet") >= 0 || clsText.IndexOf("hellstaff") >= 0 ||
+            clsText.IndexOf("etherealarrow") >= 0 || clsText.IndexOf("wandcrystal") >= 0 || clsText.IndexOf("claworb") >= 0 ||
+            clsText.IndexOf("flameorb") >= 0 || clsText.IndexOf("macesphere") >= 0 || clsText.IndexOf("brassknuckles") >= 0)
+        {
+            return true;
+        }
+
+        if (tagText.IndexOf("green mana") >= 0 || tagText.IndexOf("blue mana") >= 0 || tagText.IndexOf("mace sphere") >= 0 ||
+            tagText.IndexOf("ethereal arrow") >= 0 || tagText.IndexOf("wand crystal") >= 0 || tagText.IndexOf("flame orb") >= 0 ||
+            tagText.IndexOf("hellstaff rune") >= 0 || tagText.IndexOf("claw orb") >= 0 || tagText.IndexOf("brass knuckles") >= 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     static bool IsShopCandidate(Inventory item)
     {
         if (item == null)
+        {
+            return false;
+        }
+
+        if (!HasValidShopPresentation(item))
         {
             return false;
         }
@@ -13,7 +91,13 @@ class EXPScoreShopRules : Object
         }
 
         String clsText = String.Format("%s", item.GetClassName()).MakeLower();
+        String tagText = item.GetTag("").MakeLower();
         if (clsText == "" || clsText == "inventory")
+        {
+            return false;
+        }
+
+        if (IsForeignBuiltinItem(item, clsText, tagText))
         {
             return false;
         }
@@ -34,6 +118,48 @@ class EXPScoreShopRules : Object
         }
 
         if (clsText.IndexOf("bootsmearer") >= 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    static bool IsShopCandidateClassName(String className)
+    {
+        String clsText = className.MakeLower();
+        if (clsText == "" || clsText == "inventory")
+        {
+            return false;
+        }
+
+        if (clsText == "hexenarmor" || clsText == "armoritem" || clsText == "weaponpiece" || clsText == "weaponholder")
+        {
+            return false;
+        }
+
+        if (clsText.IndexOf("goldwand") >= 0 || clsText.IndexOf("crossbow") >= 0 || clsText.IndexOf("skullrod") >= 0 ||
+            clsText.IndexOf("phoenixrod") >= 0 || clsText.IndexOf("blaster") >= 0 || clsText.IndexOf("maceammo") >= 0 ||
+            clsText.IndexOf("mana") >= 0 || clsText.IndexOf("gauntlet") >= 0 || clsText.IndexOf("hellstaff") >= 0 ||
+            clsText.IndexOf("etherealarrow") >= 0 || clsText.IndexOf("wandcrystal") >= 0 || clsText.IndexOf("claworb") >= 0 ||
+            clsText.IndexOf("flameorb") >= 0 || clsText.IndexOf("macesphere") >= 0 || clsText.IndexOf("brassknuckles") >= 0 ||
+            clsText.IndexOf("hereticweapon") >= 0 || clsText.IndexOf("fighterweapon") >= 0 || clsText.IndexOf("clericweapon") >= 0 ||
+            clsText.IndexOf("mageweapon") >= 0 || clsText.IndexOf("fweapfist") >= 0 || clsText.IndexOf("mweapwand") >= 0)
+        {
+            return false;
+        }
+
+        if (clsText.IndexOf("token") >= 0 || clsText.IndexOf("key") >= 0)
+        {
+            return false;
+        }
+
+        if (clsText.IndexOf("puzzle") >= 0 || clsText.IndexOf("quest") >= 0)
+        {
+            return false;
+        }
+
+        if (clsText.IndexOf("marker") >= 0 || clsText.IndexOf("counter") >= 0 || clsText.IndexOf("bootsmearer") >= 0)
         {
             return false;
         }
@@ -117,6 +243,15 @@ class EXPScoreShopRules : Object
         }
     }
 
+    static String GetDisplayNameFromClassName(String className)
+    {
+        if (className == "")
+        {
+            return "Unknown";
+        }
+
+        return className;
+    }
     static String GetDisplayName(Inventory item)
     {
         if (item == null)
@@ -201,3 +336,4 @@ class EXPScoreShopRules : Object
         return 900;
     }
 }
+
