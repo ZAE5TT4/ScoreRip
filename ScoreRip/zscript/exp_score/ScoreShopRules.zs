@@ -1,4 +1,4 @@
-class EXPScoreShopRules : Object
+﻿class EXPScoreShopRules : Object
 {
     static bool HasValidShopPresentation(Inventory item)
     {
@@ -336,4 +336,6 @@ class EXPScoreShopRules : Object
         return 900;
     }
 }
+
+
 

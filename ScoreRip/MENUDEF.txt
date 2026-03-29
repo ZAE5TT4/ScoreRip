@@ -1,4 +1,4 @@
-OptionValue "ScoreOnOff"
+﻿OptionValue "ScoreOnOff"
 {
     0, "Off"
     1, "On"
@@ -39,6 +39,7 @@ OptionValue "ScoreTextColor"
     8, "Gray"
     9, "Tan"
     10, "Brick"
+    11, "Black"
 }
 
 AddOptionMenu "OptionsMenu"
@@ -46,12 +47,60 @@ AddOptionMenu "OptionsMenu"
     Submenu "Score Mod Options", "ScoreModOptions"
 }
 
+
+OptionMenu "ScoreShopOptions"
+{
+    Title "Shop Settings"
+
+    StaticText "-- Controls --"
+    Control "Open Score Shop", "score_shop_toggle"
+    StaticText " "
+    StaticText "-- General --"
+    Option "Enable Score Shop", "score_shop_enabled", "ScoreOnOff"
+    Slider "Shop Panel Alpha", "score_shop_panel_alpha", 0, 100, 5
+    Slider "Shop Visible Rows", "score_shop_rows", 4, 16, 1
+    Option "Shop Shader Effect", "score_shop_shader_enable", "ScoreOnOff"
+    StaticText " "
+    StaticText "-- Font --"
+    Option "Shop Font Size", "score_shop_font_size", "ScoreHudFontSize"
+    StaticText " "
+    StaticText "-- Colors --"
+    SafeCommand "Preset: Original Dark", "set score_shop_color_title 0; set score_shop_color_accent 3; set score_shop_color_text 4; set score_shop_color_muted 8; set score_shop_color_price_ok 1; set score_shop_color_price_no 2; set score_shop_color_panel_bg 11; set score_shop_color_panel_side 10; set score_shop_color_border 2; set score_shop_color_header_bg 11; set score_shop_color_header_line 2; set score_shop_color_select_bg 10; set score_shop_color_row_bg 11; set score_shop_color_button_bg 11; set score_shop_color_tab_active_text 2; set score_shop_color_close_text 2"
+    SafeCommand "Preset: Inferno Gold", "set score_shop_color_title 0; set score_shop_color_accent 7; set score_shop_color_text 4; set score_shop_color_muted 9; set score_shop_color_price_ok 1; set score_shop_color_price_no 2; set score_shop_color_panel_bg 11; set score_shop_color_panel_side 10; set score_shop_color_border 7; set score_shop_color_header_bg 11; set score_shop_color_header_line 7; set score_shop_color_select_bg 10; set score_shop_color_row_bg 11; set score_shop_color_button_bg 10; set score_shop_color_tab_active_text 0; set score_shop_color_close_text 7"
+    SafeCommand "Preset: Frost Byte", "set score_shop_color_title 3; set score_shop_color_accent 4; set score_shop_color_text 4; set score_shop_color_muted 8; set score_shop_color_price_ok 1; set score_shop_color_price_no 2; set score_shop_color_panel_bg 11; set score_shop_color_panel_side 6; set score_shop_color_border 3; set score_shop_color_header_bg 11; set score_shop_color_header_line 3; set score_shop_color_select_bg 6; set score_shop_color_row_bg 11; set score_shop_color_button_bg 8; set score_shop_color_tab_active_text 3; set score_shop_color_close_text 4"
+    SafeCommand "Preset: Toxic Terminal", "set score_shop_color_title 1; set score_shop_color_accent 5; set score_shop_color_text 4; set score_shop_color_muted 8; set score_shop_color_price_ok 1; set score_shop_color_price_no 2; set score_shop_color_panel_bg 11; set score_shop_color_panel_side 1; set score_shop_color_border 1; set score_shop_color_header_bg 11; set score_shop_color_header_line 5; set score_shop_color_select_bg 1; set score_shop_color_row_bg 11; set score_shop_color_button_bg 11; set score_shop_color_tab_active_text 1; set score_shop_color_close_text 5"
+    SafeCommand "Preset: Ivory Steel", "set score_shop_color_title 4; set score_shop_color_accent 9; set score_shop_color_text 4; set score_shop_color_muted 8; set score_shop_color_price_ok 1; set score_shop_color_price_no 2; set score_shop_color_panel_bg 8; set score_shop_color_panel_side 9; set score_shop_color_border 4; set score_shop_color_header_bg 9; set score_shop_color_header_line 4; set score_shop_color_select_bg 9; set score_shop_color_row_bg 11; set score_shop_color_button_bg 8; set score_shop_color_tab_active_text 4; set score_shop_color_close_text 2"
+    StaticText " "
+    Option "Title Color", "score_shop_color_title", "ScoreTextColor"
+    Option "Accent Color", "score_shop_color_accent", "ScoreTextColor"
+    Option "Text Color", "score_shop_color_text", "ScoreTextColor"
+    Option "Muted Color", "score_shop_color_muted", "ScoreTextColor"
+    Option "Price OK Color", "score_shop_color_price_ok", "ScoreTextColor"
+    Option "Price Not OK Color", "score_shop_color_price_no", "ScoreTextColor"
+    Option "Panel BG Color", "score_shop_color_panel_bg", "ScoreTextColor"
+    Option "Panel Side Color", "score_shop_color_panel_side", "ScoreTextColor"
+    Option "Border Color", "score_shop_color_border", "ScoreTextColor"
+    Option "Header BG Color", "score_shop_color_header_bg", "ScoreTextColor"
+    Option "Header Line Color", "score_shop_color_header_line", "ScoreTextColor"
+    Option "Selection Color", "score_shop_color_select_bg", "ScoreTextColor"
+    Option "Alt Row Color", "score_shop_color_row_bg", "ScoreTextColor"
+    Option "Button BG Color", "score_shop_color_button_bg", "ScoreTextColor"
+    Option "Active Tab Text Color", "score_shop_color_tab_active_text", "ScoreTextColor"
+    Option "Close Text Color", "score_shop_color_close_text", "ScoreTextColor"
+    StaticText " "
+    StaticText "-- Sounds --"
+    Option "Shop Sounds", "score_shop_sounds_enable", "ScoreOnOff"
+    StaticText " "
+    SafeCommand "Reset Shop Settings", "resetcvar score_shop_enabled; resetcvar score_shop_panel_alpha; resetcvar score_shop_rows; resetcvar score_shop_shader_enable; resetcvar score_shop_sounds_enable; resetcvar score_shop_font_size; resetcvar score_shop_color_title; resetcvar score_shop_color_accent; resetcvar score_shop_color_text; resetcvar score_shop_color_muted; resetcvar score_shop_color_price_ok; resetcvar score_shop_color_price_no; resetcvar score_shop_color_panel_bg; resetcvar score_shop_color_panel_side; resetcvar score_shop_color_border; resetcvar score_shop_color_header_bg; resetcvar score_shop_color_header_line; resetcvar score_shop_color_select_bg; resetcvar score_shop_color_row_bg; resetcvar score_shop_color_button_bg; resetcvar score_shop_color_tab_active_text; resetcvar score_shop_color_close_text"
+}
+
 OptionMenu "ScoreModOptions"
 {
     Title "Score Mod Options"
+    SubMenu "Shop Settings", "ScoreShopOptions"
+    StaticText " "
 
-    StaticText "-- Shop Controls --"
-    Control "Open Score Shop", "score_shop_toggle"
+
     StaticText " "
     StaticText "-- Progression --"
     Option "Rank Progression", "score_rank_preset", "ScoreRankPreset"
@@ -115,8 +164,8 @@ OptionMenu "ScoreModOptions"
     Slider "Kill Feed Duration (tics)", "score_killfeed_duration_tics", 35, 1400, 5
     Option "Kill Feed Font Size", "score_killfeed_font_size", "ScoreHudFontSize"
     Slider "Kill Feed Scale (%)", "score_killfeed_scale", 50, 300, 5
-    Slider "Feed Horizontal Margin", "score_killfeed_right_margin", 0, 320, 1
-    Slider "Feed Vertical Margin", "score_killfeed_top_margin", 0, 500, 1
+    Slider "Feed X Offset", "score_killfeed_right_margin", 0, 320, 1
+    Slider "Feed Y Offset", "score_killfeed_top_margin", 0, 500, 1
     Option "Feed Line 1 Color", "score_killfeed_color_1", "ScoreTextColor"
     Option "Feed Line 2 Color", "score_killfeed_color_2", "ScoreTextColor"
     Option "Feed Line 3 Color", "score_killfeed_color_3", "ScoreTextColor"
@@ -167,19 +216,13 @@ OptionMenu "ScoreModOptions"
     Option "Event Line 10 Color", "score_styleevents_color_10", "ScoreTextColor"
     StaticText " "
 
-    StaticText "-- Shop --"
-    Option "Enable Score Shop", "score_shop_enabled", "ScoreOnOff"
-    Slider "Shop Panel Alpha", "score_shop_panel_alpha", 0, 100, 5
-    Slider "Shop Visible Rows", "score_shop_rows", 4, 16, 1
-    Option "Shop Shader Effect", "score_shop_shader_enable", "ScoreOnOff"
-    StaticText " "
+
     StaticText "-- Feedback --"
     Option "Show Rank Reward Gain", "score_show_reward_gain", "ScoreOnOff"
     Option "Console Mod Messages", "score_log_score_events", "ScoreOnOff"
     Option "Show End-Level Score Panel", "score_show_endmap_summary", "ScoreOnOff"
     StaticText " "
     StaticText "-- Sounds --"
-    Option "Shop Sounds", "score_shop_sounds_enable", "ScoreOnOff"
     Option "Contract Sounds", "score_contracts_sounds_enable", "ScoreOnOff"
     Option "Rank Up Sound", "score_rankup_sound", "ScoreOnOff"
     Option "New Record Sound", "score_newrecord_sound", "ScoreOnOff"
@@ -189,7 +232,7 @@ OptionMenu "ScoreModOptions"
     Option "100% Items Sound", "score_sound_items100", "ScoreOnOff"
     Option "100% Secrets Sound", "score_sound_secrets100", "ScoreOnOff"
     StaticText " "
-    SafeCommand "Reset Score Settings", "resetcvar score_rank_preset; resetcvar score_secret_found_bonus; resetcvar score_bonus_kills100; resetcvar score_bonus_secrets100; resetcvar score_bonus_items100; resetcvar score_close_range_distance; resetcvar score_close_range_bonus_percent; resetcvar score_nohit_kills; resetcvar score_nohit_bonus_percent; resetcvar score_style_weapon_swap_bonus_percent; resetcvar score_style_repeat_start_kill; resetcvar score_style_repeat_penalty_step; resetcvar score_style_repeat_penalty_max; resetcvar score_style_multikill_window_tics; resetcvar score_style_multikill_bonus2; resetcvar score_style_multikill_bonus3; resetcvar score_style_multikill_bonus4; resetcvar score_style_barrel_bonus_percent; resetcvar score_shop_enabled; resetcvar score_shop_panel_alpha; resetcvar score_shop_rows; resetcvar score_shop_shader_enable; resetcvar score_shop_sounds_enable; resetcvar score_ui_use_global_corner; resetcvar score_ui_corner; resetcvar score_hud_show; resetcvar score_hud_show_next; resetcvar score_hud_show_rank; resetcvar score_hud_show_combo; resetcvar score_hud_show_style; resetcvar score_hud_show_prestige; resetcvar score_hud_font_size; resetcvar score_hud_scale; resetcvar score_hud_corner; resetcvar score_hud_right_margin; resetcvar score_hud_top_margin; resetcvar score_hud_line_spacing; resetcvar score_hud_color_score; resetcvar score_hud_color_next; resetcvar score_hud_color_rank; resetcvar score_hud_color_combo; resetcvar score_hud_color_style; resetcvar score_hud_color_prestige; resetcvar score_killfeed_show; resetcvar score_killfeed_show_weapon; resetcvar score_killfeed_corner; resetcvar score_killfeed_lines; resetcvar score_killfeed_duration_tics; resetcvar score_killfeed_font_size; resetcvar score_killfeed_scale; resetcvar score_killfeed_right_margin; resetcvar score_killfeed_top_margin; resetcvar score_killfeed_color_1; resetcvar score_killfeed_color_2; resetcvar score_killfeed_color_3; resetcvar score_killfeed_color_4; resetcvar score_killfeed_color_5; resetcvar score_killfeed_color_6; resetcvar score_killfeed_color_7; resetcvar score_killfeed_color_8; resetcvar score_killfeed_color_9; resetcvar score_killfeed_color_10; resetcvar score_show_reward_gain; resetcvar score_log_score_events; resetcvar score_show_endmap_summary; resetcvar score_prestige_enabled; resetcvar score_contracts_show; resetcvar score_contracts_corner; resetcvar score_contracts_right_margin; resetcvar score_contracts_top_margin; resetcvar score_contracts_line_spacing; resetcvar score_contracts_font_size; resetcvar score_contracts_scale; resetcvar score_contracts_color_1; resetcvar score_contracts_color_2; resetcvar score_contracts_color_3; resetcvar score_styleevents_show; resetcvar score_styleevents_corner; resetcvar score_styleevents_lines; resetcvar score_styleevents_duration_tics; resetcvar score_styleevents_right_margin; resetcvar score_styleevents_top_margin; resetcvar score_styleevents_font_size; resetcvar score_styleevents_scale; resetcvar score_styleevents_color_1; resetcvar score_styleevents_color_2; resetcvar score_styleevents_color_3; resetcvar score_styleevents_color_4; resetcvar score_styleevents_color_5; resetcvar score_styleevents_color_6; resetcvar score_styleevents_color_7; resetcvar score_styleevents_color_8; resetcvar score_styleevents_color_9; resetcvar score_styleevents_color_10; resetcvar score_rankup_sound; resetcvar score_newrecord_sound; resetcvar score_prestige_sound; resetcvar score_sss_sound; resetcvar score_sound_kills100; resetcvar score_sound_items100; resetcvar score_sound_secrets100"
+    SafeCommand "Reset Score Settings", "resetcvar score_rank_preset; resetcvar score_secret_found_bonus; resetcvar score_bonus_kills100; resetcvar score_bonus_secrets100; resetcvar score_bonus_items100; resetcvar score_close_range_distance; resetcvar score_close_range_bonus_percent; resetcvar score_nohit_kills; resetcvar score_nohit_bonus_percent; resetcvar score_style_weapon_swap_bonus_percent; resetcvar score_style_repeat_start_kill; resetcvar score_style_repeat_penalty_step; resetcvar score_style_repeat_penalty_max; resetcvar score_style_multikill_window_tics; resetcvar score_style_multikill_bonus2; resetcvar score_style_multikill_bonus3; resetcvar score_style_multikill_bonus4; resetcvar score_style_barrel_bonus_percent; resetcvar score_shop_enabled; resetcvar score_shop_panel_alpha; resetcvar score_shop_rows; resetcvar score_shop_shader_enable; resetcvar score_shop_sounds_enable; resetcvar score_shop_font_size; resetcvar score_shop_color_title; resetcvar score_shop_color_accent; resetcvar score_shop_color_text; resetcvar score_shop_color_muted; resetcvar score_shop_color_price_ok; resetcvar score_shop_color_price_no; resetcvar score_shop_color_panel_bg; resetcvar score_shop_color_panel_side; resetcvar score_shop_color_border; resetcvar score_shop_color_header_bg; resetcvar score_shop_color_header_line; resetcvar score_shop_color_select_bg; resetcvar score_shop_color_row_bg; resetcvar score_shop_color_button_bg; resetcvar score_shop_color_tab_active_text; resetcvar score_shop_color_close_text; resetcvar score_ui_use_global_corner; resetcvar score_ui_corner; resetcvar score_hud_show; resetcvar score_hud_show_next; resetcvar score_hud_show_rank; resetcvar score_hud_show_combo; resetcvar score_hud_show_style; resetcvar score_hud_show_prestige; resetcvar score_hud_font_size; resetcvar score_hud_scale; resetcvar score_hud_corner; resetcvar score_hud_right_margin; resetcvar score_hud_top_margin; resetcvar score_hud_line_spacing; resetcvar score_hud_color_score; resetcvar score_hud_color_next; resetcvar score_hud_color_rank; resetcvar score_hud_color_combo; resetcvar score_hud_color_style; resetcvar score_hud_color_prestige; resetcvar score_killfeed_show; resetcvar score_killfeed_show_weapon; resetcvar score_killfeed_corner; resetcvar score_killfeed_lines; resetcvar score_killfeed_duration_tics; resetcvar score_killfeed_font_size; resetcvar score_killfeed_scale; resetcvar score_killfeed_right_margin; resetcvar score_killfeed_top_margin; resetcvar score_killfeed_color_1; resetcvar score_killfeed_color_2; resetcvar score_killfeed_color_3; resetcvar score_killfeed_color_4; resetcvar score_killfeed_color_5; resetcvar score_killfeed_color_6; resetcvar score_killfeed_color_7; resetcvar score_killfeed_color_8; resetcvar score_killfeed_color_9; resetcvar score_killfeed_color_10; resetcvar score_show_reward_gain; resetcvar score_log_score_events; resetcvar score_show_endmap_summary; resetcvar score_prestige_enabled; resetcvar score_contracts_show; resetcvar score_contracts_corner; resetcvar score_contracts_right_margin; resetcvar score_contracts_top_margin; resetcvar score_contracts_line_spacing; resetcvar score_contracts_font_size; resetcvar score_contracts_scale; resetcvar score_contracts_color_1; resetcvar score_contracts_color_2; resetcvar score_contracts_color_3; resetcvar score_styleevents_show; resetcvar score_styleevents_corner; resetcvar score_styleevents_lines; resetcvar score_styleevents_duration_tics; resetcvar score_styleevents_right_margin; resetcvar score_styleevents_top_margin; resetcvar score_styleevents_font_size; resetcvar score_styleevents_scale; resetcvar score_styleevents_color_1; resetcvar score_styleevents_color_2; resetcvar score_styleevents_color_3; resetcvar score_styleevents_color_4; resetcvar score_styleevents_color_5; resetcvar score_styleevents_color_6; resetcvar score_styleevents_color_7; resetcvar score_styleevents_color_8; resetcvar score_styleevents_color_9; resetcvar score_styleevents_color_10; resetcvar score_rankup_sound; resetcvar score_newrecord_sound; resetcvar score_prestige_sound; resetcvar score_sss_sound; resetcvar score_sound_kills100; resetcvar score_sound_items100; resetcvar score_sound_secrets100"
 }
 
 OptionMenu "ScoreRankBookMenu"
@@ -282,6 +325,8 @@ OptionMenu "ScoreRankBookMenu"
     StaticText "R78 Supreme Doom"
     StaticText "R79 Transcendent"
 }
+
+
 
 
 

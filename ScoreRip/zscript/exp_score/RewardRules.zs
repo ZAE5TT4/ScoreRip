@@ -1,4 +1,4 @@
-class EXPRewardRules : Object
+﻿class EXPRewardRules : Object
 {
     static int GetThresholdForTier(int tier)
     {
@@ -211,3 +211,5 @@ class EXPRewardRules : Object
         ScriptUtil.GiveInventory(player, itemName, amount);
     }
 }
+
+

@@ -1,4 +1,4 @@
-class EXPScoreEventHandler : EventHandler
+﻿class EXPScoreEventHandler : EventHandler
 {
     private int playerScoreCache[MAXPLAYERS];
     private int playerTierCache[MAXPLAYERS];
@@ -432,13 +432,13 @@ class EXPScoreEventHandler : EventHandler
             EndScaleTransformUI();
         }
 
-        if (!shopOpen && hasLivePlayer)
+        if (hasLivePlayer)
         {
             DrawContractsUI(playerNumber);
             DrawStyleEventsUI(playerNumber);
         }
 
-        if (!shopOpen && hasLivePlayer && GetUserBoolUI('score_killfeed_show', true))
+        if (hasLivePlayer && GetUserBoolUI('score_killfeed_show', true))
         {
             DrawKillFeed();
         }
@@ -519,6 +519,7 @@ class EXPScoreEventHandler : EventHandler
         case 8: return Font.FindFontColor("Gray");
         case 9: return Font.FindFontColor("Tan");
         case 10: return Font.FindFontColor("Brick");
+        case 11: return Font.FindFontColor("Black");
         default: return Font.FindFontColor("Gold");
         }
     }
@@ -593,9 +594,7 @@ class EXPScoreEventHandler : EventHandler
         if (GetUserBoolUI('score_hud_show_combo', true)) { lineCount++; }
         if (GetUserBoolUI('score_hud_show_style', true)) { lineCount++; }
         if (GetUserBoolUI('score_hud_show_prestige', true) && GetUserBoolUI('score_prestige_enabled', true)) { lineCount++; }
-
-        double hudScale = GetUIScaleUI('score_hud_scale', 100);
-        return int(((lineCount * lineStep) + 8) * hudScale + 0.5);
+        return (lineCount * lineStep) + 8;
     }
 
     private void ResetAllRuntime()
@@ -861,22 +860,6 @@ class EXPScoreEventHandler : EventHandler
         bool isBottom = (corner == 2 || corner == 3);
 
         int hudReserved = 0;
-        if (GetUserBoolUI('score_hud_show', true))
-        {
-            int hudCorner = GetCornerUI('score_hud_corner');
-            if (hudCorner == corner)
-            {
-                hudReserved = GetHudReservedHeightUI();
-            }
-        }
-
-        int playerNumber = GetUIPlayerNumber();
-        if (GetUserBoolUI('score_contracts_show', true) && GetCornerUI('score_contracts_corner') == corner)
-        {
-            hudReserved += GetContractsReservedHeightUI();
-        }
-
-
         int anchorX = isRight ? (Screen.GetWidth() - marginX) : marginX;
         if (anchorX < 0) { anchorX = 0; }
 
@@ -891,7 +874,7 @@ class EXPScoreEventHandler : EventHandler
         }
 
         Font feedFont = GetKillFeedFontUI();
-        bool showWeapon = GetUserBoolUI('score_killfeed_show_weapon', false);
+        bool showWeapon = GetUserBoolUI('score_killfeed_show_weapon', true);
         double feedScale = GetUIScaleUI('score_killfeed_scale', 100);
         int printed = 0;
         int step = feedFont.GetHeight() + 1;
@@ -972,6 +955,11 @@ class EXPScoreEventHandler : EventHandler
             lineNoWeapon = String.Format("P%d %s +%d", playerNumber + 1, victimName, points);
         }
 
+        if (combo > 1)
+        {
+            lineWithWeapon = String.Format("%s x%d", lineWithWeapon, combo);
+            lineNoWeapon = String.Format("%s x%d", lineNoWeapon, combo);
+        }
 
         PushKillFeedText(lineWithWeapon, lineNoWeapon);
     }
@@ -1044,16 +1032,16 @@ class EXPScoreEventHandler : EventHandler
 
         if (GetUserBoolUI('score_ui_use_global_corner', true))
         {
-            corner = GetUserIntUI('score_ui_corner', 1);
+            corner = GetUserIntUI('score_ui_corner', 0);
         }
         else
         {
-            corner = GetUserIntUI(localCornerCvar, 1);
+            corner = GetUserIntUI(localCornerCvar, 0);
         }
 
         if (corner < 0 || corner > 3)
         {
-            corner = 1;
+            corner = 0;
         }
 
         return corner;
@@ -2356,6 +2344,14 @@ class EXPScoreEventHandler : EventHandler
         return 0;
     }
 }
+
+
+
+
+
+
+
+
 
 
 

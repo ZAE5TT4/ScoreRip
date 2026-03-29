@@ -1,4 +1,4 @@
-class EXPScoreToken : Inventory
+﻿class EXPScoreToken : Inventory
 {
     Default
     {
@@ -27,3 +27,5 @@ class EXPPrestigeToken : Inventory
         +INVENTORY.UNDROPPABLE
     }
 }
+
+

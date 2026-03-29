@@ -1,4 +1,4 @@
-class EXPScoreRules : Object
+﻿class EXPScoreRules : Object
 {
     static int GetScoreForKill(Actor victim, PlayerPawn killer, int comboPercent, int stylePercent)
     {
@@ -395,3 +395,5 @@ class EXPScoreRules : Object
         return GetRankNameByIndex(GetRankIndexForScore(score));
     }
 }
+
+

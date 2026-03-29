@@ -1,4 +1,4 @@
-extend class EXPScoreEventHandler
+﻿extend class EXPScoreEventHandler
 {
     private Array<Name> shopItemTypes;
     private Array<String> shopItemDisplayNames;
@@ -9,13 +9,6 @@ extend class EXPScoreEventHandler
     private int shopMessageExpireTic[MAXPLAYERS];
     private int shopOpenTic[MAXPLAYERS];
     private int shopLastBuyTic[MAXPLAYERS];
-    private bool shopMapCatalogPrimed;
-    private Actor shopSpawnQueue[256];
-    private int shopSpawnQueueHead;
-    private int shopSpawnQueueTail;
-    private int shopSpawnQueueCount;
-    private bool shopCatalogDirty;
-    private bool shopSpawnQueueOverflowed;
 
     ui int shopCursorX[MAXPLAYERS];
     ui int shopCursorY[MAXPLAYERS];
@@ -24,10 +17,10 @@ extend class EXPScoreEventHandler
     ui int shopSelectedPage[MAXPLAYERS];
     ui int shopSelectedRow[MAXPLAYERS];
     ui int shopLastInputTic[MAXPLAYERS];
+    private bool shopCatalogPrimed;
+    private int shopCatalogNextRescanTic;
     override void OnRegister()
     {
-        shopMapCatalogPrimed = false;
-        ClearShopSpawnQueue();
         IsUiProcessor = false;
         RequireMouse = false;
         ResetShopStateRuntime();
@@ -83,13 +76,52 @@ extend class EXPScoreEventHandler
         }
     }
 
+    private play void PrimeShopCatalogOnce()
+    {
+        if (shopCatalogPrimed)
+        {
+            return;
+        }
+
+        ScanWorldShopItems();
+        SaveCatalogToCVar();
+        shopCatalogPrimed = true;
+        shopCatalogNextRescanTic = level.time + 35;
+    }
+
+    private play void TickShopCatalogQueue()
+    {
+        if (gamestate != GS_LEVEL)
+        {
+            return;
+        }
+
+        if (!shopCatalogPrimed)
+        {
+            PrimeShopCatalogOnce();
+            return;
+        }
+
+        if (level.time < shopCatalogNextRescanTic)
+        {
+            return;
+        }
+
+        shopCatalogNextRescanTic = level.time + 35;
+        int oldCount = shopItemTypes.Size();
+        ScanWorldShopItems();
+        if (shopItemTypes.Size() != oldCount)
+        {
+            SaveCatalogToCVar();
+        }
+    }
+
     void ClearShopCatalog()
     {
         shopItemTypes.Clear();
         shopItemDisplayNames.Clear();
         shopItemCategories.Clear();
         shopItemPrices.Clear();
-        ClearShopSpawnQueue();
     }
 
     private void ResetShopStateRuntime()
@@ -102,8 +134,6 @@ extend class EXPScoreEventHandler
             shopMessageExpireTic[i] = 0;
             shopLastBuyTic[i] = 0;
         }
-        shopMapCatalogPrimed = false;
-        ClearShopSpawnQueue();
         IsUiProcessor = false;
         RequireMouse = false;
     }
@@ -323,8 +353,6 @@ extend class EXPScoreEventHandler
             shopLastBuyTic[i] = 0;
         }
 
-        shopMapCatalogPrimed = false;
-        ClearShopSpawnQueue();
         IsUiProcessor = false;
         RequireMouse = false;
     }
@@ -340,8 +368,6 @@ extend class EXPScoreEventHandler
             shopLastBuyTic[i] = 0;
         }
 
-        shopMapCatalogPrimed = false;
-        ClearShopSpawnQueue();
         IsUiProcessor = false;
         RequireMouse = false;
     }
@@ -433,30 +459,10 @@ extend class EXPScoreEventHandler
         }
     }
 
-    private play void PrimeShopCatalogOnce()
-    {
-        if (shopMapCatalogPrimed || gamestate != GS_LEVEL)
-        {
-            return;
-        }
-        ScanWorldShopItems();
-        SaveCatalogToCVar();
-        shopCatalogDirty = false;
-        shopMapCatalogPrimed = true;
-    }
-    override void WorldThingSpawned(WorldEvent e)
-    {
-        if (gamestate != GS_LEVEL || e.Thing == null)
-        {
-            return;
-        }
-        TryAssignEliteMonster(e.Thing);
-        QueueShopCatalogThing(e.Thing);
-    }
     private play void RefreshShopCatalogForPlayer(int playerNumber)
     {
-        PrimeShopCatalogOnce();
         RegisterPlayerShopInventory(playerNumber);
+        ScanWorldShopItems();
     }
     private play void RegisterPlayerShopInventory(int playerNumber)
     {
@@ -497,100 +503,6 @@ extend class EXPScoreEventHandler
         }
     }
 
-    private void ClearShopSpawnQueue()
-    {
-        for (int i = 0; i < 256; i++)
-        {
-            shopSpawnQueue[i] = null;
-        }
-        shopSpawnQueueHead = 0;
-        shopSpawnQueueTail = 0;
-        shopSpawnQueueCount = 0;
-        shopCatalogDirty = false;
-        shopSpawnQueueOverflowed = false;
-    }
-    private play bool HasShopCatalogType(Name itemType)
-    {
-        if (itemType == 'None')
-        {
-            return true;
-        }
-        for (int i = 0; i < shopItemTypes.Size(); i++)
-        {
-            if (shopItemTypes[i] == itemType)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-    private play void QueueShopCatalogThing(Actor thing)
-    {
-        if (thing == null || shopItemTypes.Size() >= 200)
-        {
-            return;
-        }
-        Inventory item = Inventory(thing);
-        if (item == null || item.Owner != null || item.GetClass() == null)
-        {
-            return;
-        }
-        Name itemType = item.GetClassName();
-        if (HasShopCatalogType(itemType))
-        {
-            return;
-        }
-        if (shopSpawnQueueCount >= 256)
-        {
-            shopSpawnQueueOverflowed = true;
-            return;
-        }
-        shopSpawnQueue[shopSpawnQueueTail] = thing;
-        shopSpawnQueueTail++;
-        if (shopSpawnQueueTail >= 256)
-        {
-            shopSpawnQueueTail = 0;
-        }
-        shopSpawnQueueCount++;
-    }
-    private play void TickShopCatalogQueue()
-    {
-        if (gamestate != GS_LEVEL)
-        {
-            return;
-        }
-        if (shopSpawnQueueOverflowed)
-        {
-            ClearShopSpawnQueue();
-            ScanWorldShopItems();
-            shopCatalogDirty = true;
-        }
-        int processed = 0;
-        while (shopSpawnQueueCount > 0 && processed < 6 && shopItemTypes.Size() < 200)
-        {
-            Actor thing = shopSpawnQueue[shopSpawnQueueHead];
-            shopSpawnQueue[shopSpawnQueueHead] = null;
-            shopSpawnQueueHead++;
-            if (shopSpawnQueueHead >= 256)
-            {
-                shopSpawnQueueHead = 0;
-            }
-            shopSpawnQueueCount--;
-            processed++;
-            int oldSize = shopItemTypes.Size();
-            RegisterShopCatalogThing(thing);
-            if (shopItemTypes.Size() > oldSize)
-            {
-                shopCatalogDirty = true;
-            }
-        }
-        if (shopCatalogDirty && (level.time % TICRATE) == 0)
-        {
-            SaveCatalogToCVar();
-            shopCatalogDirty = false;
-        }
-    }
-
     private play void RegisterShopCatalogThing(Actor thing)
     {
         if (thing == null) { return; }
@@ -598,7 +510,6 @@ extend class EXPScoreEventHandler
         if (item == null) { return; }
         if (item.Owner != null) { return; }
         if (item.GetClass() == null) { return; }
-        if (HasShopCatalogType(item.GetClassName())) { return; }
         RegisterShopCatalogItem(item);
     }
 
@@ -626,20 +537,10 @@ extend class EXPScoreEventHandler
             clsLow == "manaitem"      ||
             clsLow == "weaponpiece"   ||
             clsLow == "weaponholder"  ||
-            clsLow == "fakeinventory" ||
-            clsLow == "gauntlets"     ||
-            clsLow == "mace"          ||
-            clsLow == "goldwand"      ||
-            clsLow == "crossbow"      ||
-            clsLow == "blaster"       ||
-            clsLow == "skullrod"      ||
-            clsLow == "phoenixrod"    ||
-            clsLow == "fweapfist"     ||
-            clsLow == "mweapwand")
+            clsLow == "fakeinventory")
         {
             return;
         }
-
         if (clsLow.IndexOf("neverselect") >= 0 ||
             clsLow.IndexOf("selected")   >= 0  ||
             clsLow.IndexOf("isplayer")   >= 0  ||
@@ -687,7 +588,7 @@ extend class EXPScoreEventHandler
         shopItemDisplayNames.Push(displayName);
         shopItemCategories.Push(category);
         shopItemPrices.Push(price);
-        shopCatalogDirty = true;
+        if ((shopItemTypes.Size() % 3) == 0) { SaveCatalogToCVar(); }
     }
 
     private play void BuyShopItemForPlayer(int playerNumber, int catalogIndex)
@@ -709,7 +610,7 @@ extend class EXPScoreEventHandler
         }
 
         if (catalogIndex >= shopItemPrices.Size() || catalogIndex >= shopItemTypes.Size()) { return; }
-        int price = GetShopPriceForCatalogIndex(catalogIndex);
+        int price = shopItemPrices[catalogIndex];
         int score = GetScore(player);
         String displayName = shopItemDisplayNames[catalogIndex];
         Name itemType = shopItemTypes[catalogIndex];
@@ -1110,6 +1011,39 @@ extend class EXPScoreEventHandler
         }
     }
 
+    private ui int GetShopRGBByPreset(int preset)
+    {
+        switch (preset)
+        {
+        case 0: return 0xC8A03A;
+        case 1: return 0x2FA84A;
+        case 2: return 0xB03030;
+        case 3: return 0x4A8FD8;
+        case 4: return 0xF1F1F1;
+        case 5: return 0xD4C246;
+        case 6: return 0x3058B0;
+        case 7: return 0xD47C28;
+        case 8: return 0x6E6E6E;
+        case 9: return 0x8A6E52;
+        case 10: return 0x402020;
+        case 11: return 0x000000;
+        default: return 0xC8A03A;
+        }
+    }
+
+    private ui int GetShopRGBFromCVar(Name cvarName, int defaultPreset)
+    {
+        return GetShopRGBByPreset(GetUserIntUI(cvarName, defaultPreset));
+    }
+
+    private ui Font GetShopFontUI()
+    {
+        int sz = GetUserIntUI('score_shop_font_size', 0);
+        if (sz == 1) { return Font.FindFont("BigFont"); }
+        if (sz == 2) { return Font.FindFont("BigFont"); }
+        return BigFont;
+    }
+
     private ui void DrawShopOverlayUI(int playerNumber)
     {
         if (!GetUserBoolUI('score_shop_enabled', true))
@@ -1154,7 +1088,6 @@ extend class EXPScoreEventHandler
         int    fontOff = fontH / 8;
         double pulsePhase = (level.time % 35) / 35.0;
         double pulseAlpha = 0.68 + 0.20 * sin(pulsePhase * 360.0);
-
         int panelW = int(sw * 0.92);
         int panelH = int(sh * 0.90);
         if (panelW < 700)    panelW = 700;
@@ -1168,35 +1101,41 @@ extend class EXPScoreEventHandler
         if (alphaPercent < 0)   alphaPercent = 0;
         if (alphaPercent > 100) alphaPercent = 100;
         double alpha = alphaPercent / 100.0;
-
-        int titleColor  = Font.FindFontColor("Gold");
-        int accentColor = Font.FindFontColor("LightBlue");
-        int textColor   = Font.FindFontColor("White");
-        int mutedColor  = Font.FindFontColor("Gray");
+        int titleColor  = GetUIColorFromCVar('score_shop_color_title',    0);
+        int accentColor = GetUIColorFromCVar('score_shop_color_accent',   3);
+        int textColor   = GetUIColorFromCVar('score_shop_color_text',     4);
+        int mutedColor  = GetUIColorFromCVar('score_shop_color_muted',    8);
         int redColor    = Font.FindFontColor("Red");
-        int greenColor  = Font.FindFontColor("LightGreen");
+        int greenColor  = GetUIColorFromCVar('score_shop_color_price_ok', 1);
         int orangeColor = Font.FindFontColor("Orange");
-
-        Screen.Dim(0x060408, alpha + 0.18, panelX, panelY, panelW, panelH);
-
-        Screen.Dim(0x1A0000, 0.30, panelX, panelY, 6, panelH);
-        Screen.Dim(0x1A0000, 0.30, panelX + panelW - 6, panelY, 6, panelH);
-
-        Screen.DrawThickLine(panelX,          panelY,          panelX + panelW, panelY,          2.5, 0xCC2020, 255);
-        Screen.DrawThickLine(panelX,          panelY + panelH, panelX + panelW, panelY + panelH, 2.5, 0xCC2020, 255);
-        Screen.DrawThickLine(panelX,          panelY,          panelX,          panelY + panelH, 2.5, 0xCC2020, 255);
-        Screen.DrawThickLine(panelX + panelW, panelY,          panelX + panelW, panelY + panelH, 2.5, 0xCC2020, 255);
-
+        int priceNoColor = GetUIColorFromCVar('score_shop_color_price_no', 2);
+        int panelBgRgb   = GetShopRGBFromCVar('score_shop_color_panel_bg', 10);
+        int panelSideRgb = GetShopRGBFromCVar('score_shop_color_panel_side', 2);
+        int borderRgb    = GetShopRGBFromCVar('score_shop_color_border', 2);
+        int headerBgRgb  = GetShopRGBFromCVar('score_shop_color_header_bg', 10);
+        int headerLineRgb = GetShopRGBFromCVar('score_shop_color_header_line', 2);
+        int selectBgRgb  = GetShopRGBFromCVar('score_shop_color_select_bg', 2);
+        int rowBgRgb     = GetShopRGBFromCVar('score_shop_color_row_bg', 10);
+        int buttonBgRgb  = GetShopRGBFromCVar('score_shop_color_button_bg', 8);
+        int tabActiveTextColor = GetUIColorFromCVar('score_shop_color_tab_active_text', 2);
+        int closeTextColor = GetUIColorFromCVar('score_shop_color_close_text', 2);
+        Screen.Dim(0x000000, 0.65, 0, 0, sw, sh);
+        Screen.Dim(panelBgRgb, alpha + 0.18, panelX, panelY, panelW, panelH);
+        Screen.Dim(panelSideRgb, 0.30, panelX, panelY, 6, panelH);
+        Screen.Dim(panelSideRgb, 0.30, panelX + panelW - 6, panelY, 6, panelH);
+        Screen.DrawThickLine(panelX,          panelY,          panelX + panelW, panelY,          2.5, borderRgb, 255);
+        Screen.DrawThickLine(panelX,          panelY + panelH, panelX + panelW, panelY + panelH, 2.5, borderRgb, 255);
+        Screen.DrawThickLine(panelX,          panelY,          panelX,          panelY + panelH, 2.5, borderRgb, 255);
+        Screen.DrawThickLine(panelX + panelW, panelY,          panelX + panelW, panelY + panelH, 2.5, borderRgb, 255);
         int headerH  = fontH + 16;
         int headerTY = panelY + (headerH - fontH) / 2 + fontOff;
-        Screen.Dim(0x1A0505, 0.95, panelX + 2, panelY + 2, panelW - 4, headerH - 2);
-        Screen.DrawThickLine(panelX + 2, panelY + headerH, panelX + panelW - 2, panelY + headerH, 2.0, 0xCC3030, 220);
+        Screen.Dim(headerBgRgb, 0.95, panelX + 2, panelY + 2, panelW - 4, headerH - 2);
+        Screen.DrawThickLine(panelX + 2, panelY + headerH, panelX + panelW - 2, panelY + headerH, 2.0, headerLineRgb, 220);
 
         Screen.DrawText(fnt, titleColor, panelX + 18, headerTY, "SCORE SHOP", DTA_ScaleX, sc, DTA_ScaleY, sc);
         String scoreText = String.Format("SCORE: %d", playerScoreCache[playerNumber]);
         int    scoreW    = int(fnt.StringWidth(scoreText) * sc);
         Screen.DrawText(fnt, accentColor, panelX + panelW - scoreW - 18, headerTY, scoreText, DTA_ScaleX, sc, DTA_ScaleY, sc);
-
         int btnH    = fontH + 14;
         int btnGap  = 10;
         int bottomY = panelY + panelH - btnH - btnGap;
@@ -1215,7 +1154,6 @@ extend class EXPScoreEventHandler
         int listTop     = itemsY + listHeaderH;
         int rowH        = fontH + 14;
         int rows        = GetShopVisibleRowsUI();
-
         for (int category = 0; category < 6; category++)
         {
             int  tabY      = tabsY + (category * (tabH + tabGap));
@@ -1224,16 +1162,16 @@ extend class EXPScoreEventHandler
 
             if (active)
             {
-                Screen.Dim(0x5A1818, pulseAlpha, tabsX, tabY, tabW, tabH);
-                Screen.DrawThickLine(tabsX + 2,    tabY,        tabsX + 2,    tabY + tabH, 5.0, 0xFF3030, 255);
-                Screen.DrawThickLine(tabsX,        tabY,        tabsX + tabW, tabY,        1.5, 0xCC2020, 200);
-                Screen.DrawThickLine(tabsX,        tabY + tabH, tabsX + tabW, tabY + tabH, 1.5, 0xCC2020, 200);
-                Screen.DrawThickLine(tabsX + tabW, tabY,        tabsX + tabW, tabY + tabH, 1.5, 0xCC2020, 200);
+                Screen.Dim(selectBgRgb, pulseAlpha, tabsX, tabY, tabW, tabH);
+                Screen.DrawThickLine(tabsX + 2,    tabY,        tabsX + 2,    tabY + tabH, 5.0, borderRgb, 255);
+                Screen.DrawThickLine(tabsX,        tabY,        tabsX + tabW, tabY,        1.5, borderRgb, 200);
+                Screen.DrawThickLine(tabsX,        tabY + tabH, tabsX + tabW, tabY + tabH, 1.5, borderRgb, 200);
+                Screen.DrawThickLine(tabsX + tabW, tabY,        tabsX + tabW, tabY + tabH, 1.5, borderRgb, 200);
             }
             else
             {
-                Screen.Dim(0x000000, 0.65, tabsX, tabY, tabW, tabH);
-                Screen.DrawThickLine(tabsX + tabW, tabY, tabsX + tabW, tabY + tabH, 1.0, 0x331010, 120);
+                Screen.Dim(panelBgRgb, 0.65, tabsX, tabY, tabW, tabH);
+                Screen.DrawThickLine(tabsX + tabW, tabY, tabsX + tabW, tabY + tabH, 1.0, borderRgb, 120);
             }
 
             String catName  = EXPScoreShopRules.GetCategoryName(category).MakeUpper();
@@ -1241,18 +1179,16 @@ extend class EXPScoreEventHandler
             int    cntW     = int(fnt.StringWidth(countStr) * sc);
             int    tabTextY = tabY + (tabH - fontH) / 2 + fontOff;
 
-            Screen.DrawText(fnt, active ? redColor : mutedColor,   tabsX + 14,               tabTextY, catName,  DTA_ScaleX, sc, DTA_ScaleY, sc);
+            Screen.DrawText(fnt, active ? tabActiveTextColor : mutedColor,   tabsX + 14,               tabTextY, catName,  DTA_ScaleX, sc, DTA_ScaleY, sc);
             Screen.DrawText(fnt, active ? titleColor : mutedColor, tabsX + tabW - cntW - 12, tabTextY, countStr, DTA_ScaleX, sc, DTA_ScaleY, sc);
         }
-
-        Screen.DrawThickLine(itemsX - 8, tabsY, itemsX - 8, bottomY - 4, 1.5, 0xAA2020, 220);
-
+        Screen.DrawThickLine(itemsX - 8, tabsY, itemsX - 8, bottomY - 4, 1.5, borderRgb, 220);
         int pageCount       = GetShopPageCount(shopSelectedCategory[playerNumber], rows);
         int totalInCategory = GetShopItemCountForCategory(shopSelectedCategory[playerNumber]);
         int listHdrTY       = itemsY + (listHeaderH - fontH) / 2 + fontOff;
 
-        Screen.Dim(0x000000, 0.75, itemsX, itemsY, itemsW, listHeaderH);
-        Screen.DrawThickLine(itemsX, itemsY + listHeaderH, itemsX + itemsW, itemsY + listHeaderH, 1.5, 0xAA2020, 220);
+        Screen.Dim(headerBgRgb, 0.75, itemsX, itemsY, itemsW, listHeaderH);
+        Screen.DrawThickLine(itemsX, itemsY + listHeaderH, itemsX + itemsW, itemsY + listHeaderH, 1.5, borderRgb, 220);
 
         String catTitle = EXPScoreShopRules.GetCategoryName(shopSelectedCategory[playerNumber]).MakeUpper();
         Screen.DrawText(fnt, titleColor, itemsX + 8, listHdrTY, catTitle, DTA_ScaleX, sc, DTA_ScaleY, sc);
@@ -1264,7 +1200,6 @@ extend class EXPScoreEventHandler
         String totalInfo = String.Format("%d ITEMS", totalInCategory);
         int    tiW       = int(fnt.StringWidth(totalInfo) * sc);
         Screen.DrawText(fnt, mutedColor, itemsX + itemsW - tiW - 8, listHdrTY, totalInfo, DTA_ScaleX, sc, DTA_ScaleY, sc);
-
         if (totalInCategory <= 0)
         {
             Screen.DrawText(fnt, mutedColor, itemsX + 14, listTop + 14, "NO ITEMS IN THIS CATEGORY", DTA_ScaleX, sc, DTA_ScaleY, sc);
@@ -1283,15 +1218,15 @@ extend class EXPScoreEventHandler
 
                 if (selected)
                 {
-                    Screen.Dim(0x5A1818, pulseAlpha, itemsX, rowY, itemsW, rowH);
-                    Screen.DrawThickLine(itemsX + 2,      rowY,        itemsX + 2,      rowY + rowH, 5.0, 0xFF3030, 255);
-                    Screen.DrawThickLine(itemsX,          rowY,        itemsX + itemsW, rowY,        1.5, 0xCC2020, 200);
-                    Screen.DrawThickLine(itemsX,          rowY + rowH, itemsX + itemsW, rowY + rowH, 1.5, 0xCC2020, 200);
-                    Screen.DrawThickLine(itemsX + itemsW, rowY,        itemsX + itemsW, rowY + rowH, 1.5, 0xCC2020, 200);
+                    Screen.Dim(selectBgRgb, pulseAlpha, itemsX, rowY, itemsW, rowH);
+                    Screen.DrawThickLine(itemsX + 2,      rowY,        itemsX + 2,      rowY + rowH, 5.0, borderRgb, 255);
+                    Screen.DrawThickLine(itemsX,          rowY,        itemsX + itemsW, rowY,        1.5, borderRgb, 200);
+                    Screen.DrawThickLine(itemsX,          rowY + rowH, itemsX + itemsW, rowY + rowH, 1.5, borderRgb, 200);
+                    Screen.DrawThickLine(itemsX + itemsW, rowY,        itemsX + itemsW, rowY + rowH, 1.5, borderRgb, 200);
                 }
                 else if ((row % 2) == 0)
                 {
-                    Screen.Dim(0x0A0505, 0.45, itemsX, rowY, itemsW, rowH);
+                    Screen.Dim(rowBgRgb, 0.45, itemsX, rowY, itemsW, rowH);
                 }
 
                 if (catalogIndex >= shopItemDisplayNames.Size()) { break; }
@@ -1300,7 +1235,7 @@ extend class EXPScoreEventHandler
                 int    specialPct = GetShopSpecialDiscountForCatalogIndexUI(catalogIndex);
                 bool   canAfford  = (playerScoreCache[playerNumber] >= itemPrice);
                 String priceText  = specialPct > 0 ? String.Format("%d -%d%%", itemPrice, specialPct) : String.Format("%d", itemPrice);
-                int    priceColor = specialPct > 0 ? orangeColor : (canAfford ? greenColor : redColor);
+                int    priceColor = specialPct > 0 ? orangeColor : (canAfford ? greenColor : priceNoColor);
                 int    priceW     = int(fnt.StringWidth(priceText) * sc);
                 int    priceX     = itemsX + itemsW - priceW - 14;
                 String rowNum     = String.Format("%d.", row + 1);
@@ -1319,7 +1254,6 @@ extend class EXPScoreEventHandler
             }
             Screen.ClearClipRect();
         }
-
         if (shopMessageExpireTic[playerNumber] > level.time && shopMessage[playerNumber] != "")
         {
             String msg   = shopMessage[playerNumber];
@@ -1328,14 +1262,13 @@ extend class EXPScoreEventHandler
             int    msgBoxH = fontH + 16;
             int    msgBoxY = bottomY - msgBoxH - 14;
             int    msgTY   = msgBoxY + (msgBoxH - fontH) / 2 + fontOff;
-            Screen.Dim(0x200000, 0.88, msgX - 10, msgBoxY, msgW + 20, msgBoxH);
-            Screen.DrawThickLine(msgX - 10, msgBoxY,            msgX + msgW + 10, msgBoxY,            1.5, 0xFF3030, 230);
-            Screen.DrawThickLine(msgX - 10, msgBoxY + msgBoxH,  msgX + msgW + 10, msgBoxY + msgBoxH,  1.5, 0xFF3030, 230);
-            Screen.DrawThickLine(msgX - 10, msgBoxY,            msgX - 10,        msgBoxY + msgBoxH,  1.5, 0xFF3030, 230);
-            Screen.DrawThickLine(msgX + msgW + 10, msgBoxY,     msgX + msgW + 10, msgBoxY + msgBoxH,  1.5, 0xFF3030, 230);
+            Screen.Dim(headerBgRgb, 0.88, msgX - 10, msgBoxY, msgW + 20, msgBoxH);
+            Screen.DrawThickLine(msgX - 10, msgBoxY,            msgX + msgW + 10, msgBoxY,            1.5, borderRgb, 230);
+            Screen.DrawThickLine(msgX - 10, msgBoxY + msgBoxH,  msgX + msgW + 10, msgBoxY + msgBoxH,  1.5, borderRgb, 230);
+            Screen.DrawThickLine(msgX - 10, msgBoxY,            msgX - 10,        msgBoxY + msgBoxH,  1.5, borderRgb, 230);
+            Screen.DrawThickLine(msgX + msgW + 10, msgBoxY,     msgX + msgW + 10, msgBoxY + msgBoxH,  1.5, borderRgb, 230);
             Screen.DrawText(fnt, titleColor, msgX, msgTY, msg, DTA_ScaleX, sc, DTA_ScaleY, sc);
         }
-
         String prevLabel  = "PREV";
         String nextLabel  = "NEXT";
         String closeLabel = "ESC CLOSE";
@@ -1348,28 +1281,28 @@ extend class EXPScoreEventHandler
         int btnPrevX  = btnNextX  - btnPrevW - 10;
         int textOffY  = (btnH - fontH) / 2 + fontOff;
 
-        Screen.Dim(0x141414, 0.74, btnPrevX,  bottomY, btnPrevW,  btnH);
-        Screen.Dim(0x141414, 0.74, btnNextX,  bottomY, btnNextW,  btnH);
-        Screen.Dim(0x2A1010, 0.82, btnCloseX, bottomY, btnCloseW, btnH);
+        Screen.Dim(buttonBgRgb, 0.74, btnPrevX,  bottomY, btnPrevW,  btnH);
+        Screen.Dim(buttonBgRgb, 0.74, btnNextX,  bottomY, btnNextW,  btnH);
+        Screen.Dim(selectBgRgb, 0.82, btnCloseX, bottomY, btnCloseW, btnH);
 
-        Screen.DrawThickLine(btnPrevX,             bottomY,        btnPrevX + btnPrevW,   bottomY,        1.5, 0xF1F1F1, 210);
-        Screen.DrawThickLine(btnPrevX,             bottomY + btnH, btnPrevX + btnPrevW,   bottomY + btnH, 1.5, 0xF1F1F1, 210);
-        Screen.DrawThickLine(btnPrevX,             bottomY,        btnPrevX,              bottomY + btnH, 1.5, 0xF1F1F1, 210);
-        Screen.DrawThickLine(btnPrevX + btnPrevW,  bottomY,        btnPrevX + btnPrevW,   bottomY + btnH, 1.5, 0xF1F1F1, 210);
+        Screen.DrawThickLine(btnPrevX,             bottomY,        btnPrevX + btnPrevW,   bottomY,        1.5, borderRgb, 210);
+        Screen.DrawThickLine(btnPrevX,             bottomY + btnH, btnPrevX + btnPrevW,   bottomY + btnH, 1.5, borderRgb, 210);
+        Screen.DrawThickLine(btnPrevX,             bottomY,        btnPrevX,              bottomY + btnH, 1.5, borderRgb, 210);
+        Screen.DrawThickLine(btnPrevX + btnPrevW,  bottomY,        btnPrevX + btnPrevW,   bottomY + btnH, 1.5, borderRgb, 210);
 
-        Screen.DrawThickLine(btnNextX,             bottomY,        btnNextX + btnNextW,   bottomY,        1.5, 0xF1F1F1, 210);
-        Screen.DrawThickLine(btnNextX,             bottomY + btnH, btnNextX + btnNextW,   bottomY + btnH, 1.5, 0xF1F1F1, 210);
-        Screen.DrawThickLine(btnNextX,             bottomY,        btnNextX,              bottomY + btnH, 1.5, 0xF1F1F1, 210);
-        Screen.DrawThickLine(btnNextX + btnNextW,  bottomY,        btnNextX + btnNextW,   bottomY + btnH, 1.5, 0xF1F1F1, 210);
+        Screen.DrawThickLine(btnNextX,             bottomY,        btnNextX + btnNextW,   bottomY,        1.5, borderRgb, 210);
+        Screen.DrawThickLine(btnNextX,             bottomY + btnH, btnNextX + btnNextW,   bottomY + btnH, 1.5, borderRgb, 210);
+        Screen.DrawThickLine(btnNextX,             bottomY,        btnNextX,              bottomY + btnH, 1.5, borderRgb, 210);
+        Screen.DrawThickLine(btnNextX + btnNextW,  bottomY,        btnNextX + btnNextW,   bottomY + btnH, 1.5, borderRgb, 210);
 
-        Screen.DrawThickLine(btnCloseX,             bottomY,        btnCloseX + btnCloseW, bottomY,        1.5, 0xCC2020, 230);
-        Screen.DrawThickLine(btnCloseX,             bottomY + btnH, btnCloseX + btnCloseW, bottomY + btnH, 1.5, 0xCC2020, 230);
-        Screen.DrawThickLine(btnCloseX,             bottomY,        btnCloseX,             bottomY + btnH, 1.5, 0xCC2020, 230);
-        Screen.DrawThickLine(btnCloseX + btnCloseW, bottomY,        btnCloseX + btnCloseW, bottomY + btnH, 1.5, 0xCC2020, 230);
+        Screen.DrawThickLine(btnCloseX,             bottomY,        btnCloseX + btnCloseW, bottomY,        1.5, borderRgb, 230);
+        Screen.DrawThickLine(btnCloseX,             bottomY + btnH, btnCloseX + btnCloseW, bottomY + btnH, 1.5, borderRgb, 230);
+        Screen.DrawThickLine(btnCloseX,             bottomY,        btnCloseX,             bottomY + btnH, 1.5, borderRgb, 230);
+        Screen.DrawThickLine(btnCloseX + btnCloseW, bottomY,        btnCloseX + btnCloseW, bottomY + btnH, 1.5, borderRgb, 230);
 
         Screen.DrawText(fnt, textColor, btnPrevX  + (btnPrevW  - int(fnt.StringWidth(prevLabel)  * sc)) / 2, bottomY + textOffY, prevLabel,  DTA_ScaleX, sc, DTA_ScaleY, sc);
         Screen.DrawText(fnt, textColor, btnNextX  + (btnNextW  - int(fnt.StringWidth(nextLabel)  * sc)) / 2, bottomY + textOffY, nextLabel,  DTA_ScaleX, sc, DTA_ScaleY, sc);
-        Screen.DrawText(fnt, redColor,  btnCloseX + (btnCloseW - int(fnt.StringWidth(closeLabel) * sc)) / 2, bottomY + textOffY, closeLabel, DTA_ScaleX, sc, DTA_ScaleY, sc);
+        Screen.DrawText(fnt, closeTextColor,  btnCloseX + (btnCloseW - int(fnt.StringWidth(closeLabel) * sc)) / 2, bottomY + textOffY, closeLabel, DTA_ScaleX, sc, DTA_ScaleY, sc);
 
         Screen.DrawText(fnt, mutedColor, panelX + 16, bottomY + textOffY, "ENTER=BUY  W/S=ROW  A/D=TAB  Q/E=PAGE", DTA_ScaleX, sc, DTA_ScaleY, sc);
     }
@@ -1480,6 +1413,9 @@ extend class EXPScoreEventHandler
         EndScaleTransformUI();
     }
 }
+
+
+
 
 
 

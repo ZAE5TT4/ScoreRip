@@ -1,4 +1,4 @@
-extend class EXPScoreEventHandler
+﻿extend class EXPScoreEventHandler
 {
     private Actor eliteMonsterActors[3];
     private Actor eliteAuraActors[3];
@@ -117,7 +117,7 @@ extend class EXPScoreEventHandler
             mapContractReward[slot] = 900;
             break;
         case 4:
-            mapContractTarget[slot] = 180;
+            mapContractTarget[slot] = 350;
             mapContractReward[slot] = 850;
             break;
         case 5:
@@ -125,7 +125,7 @@ extend class EXPScoreEventHandler
             mapContractReward[slot] = 750;
             break;
         default:
-            mapContractTarget[slot] = 10000;
+            mapContractTarget[slot] = 1500;
             mapContractReward[slot] = 700;
             break;
         }
@@ -271,7 +271,6 @@ extend class EXPScoreEventHandler
             PushStyleEvent(playerNumber, "TASK COMPLETE");
             if (GetUserBoolPlay(playerNumber, 'score_contracts_sounds_enable', true))
             {
-                // Count completed contracts
                 int doneCount = 0;
                 for (int cs = 0; cs < 3; cs++)
                 {
@@ -496,6 +495,16 @@ extend class EXPScoreEventHandler
         EndScaleTransformUI();
     }
 
+    override void WorldThingSpawned(WorldEvent e)
+    {
+        if (e.Thing == null)
+        {
+            return;
+        }
+
+        TryAssignEliteMonster(e.Thing);
+    }
+
     private ui void DrawStyleEventsUI(int playerNumber)
     {
         if (!GetUserBoolUI('score_styleevents_show', true))
@@ -687,10 +696,8 @@ extend class EXPScoreEventHandler
 
     private play bool IsExcludedEliteLoot(Name t)
     {
-        // Ключи
         if (t == 'RedCard' || t == 'BlueCard' || t == 'YellowCard') { return true; }
         if (t == 'RedSkull' || t == 'BlueSkull' || t == 'YellowSkull') { return true; }
-        // Минимальные бонусы здоровья/брони (1 единица)
         if (t == 'HealthBonus' || t == 'ArmorBonus') { return true; }
         return false;
     }
@@ -711,15 +718,20 @@ extend class EXPScoreEventHandler
                 }
             }
         }
-
-        switch (Random(0, 5))
+        switch (Random(0, 11))
         {
-        case 0: return 'Stimpack';
-        case 1: return 'Medikit';
-        case 2: return 'ClipBox';
-        case 3: return 'ShellBox';
-        case 4: return 'ArmorBonus';
-        default: return 'Berserk';
+        case 0:  return 'Stimpack';
+        case 1:  return 'Medikit';
+        case 2:  return 'ClipBox';
+        case 3:  return 'ShellBox';
+        case 4:  return 'GreenArmor';
+        case 5:  return 'Berserk';
+        case 6:  return 'Soulsphere';
+        case 7:  return 'Megasphere';
+        case 8:  return 'InvulnerabilitySphere';
+        case 9:  return 'BlurSphere';
+        case 10: return 'RadSuit';
+        default: return 'Infrared';
         }
     }
 
@@ -779,8 +791,6 @@ extend class EXPScoreEventHandler
         {
             PushStyleEvent(playerNumber, "SSS");
         }
-
-        // Multikill escalation
         if (playerMultiKillCount[playerNumber] == 3)
         {
             PushStyleEvent(playerNumber, "TRIPLE KILL");
@@ -793,8 +803,6 @@ extend class EXPScoreEventHandler
         {
             PushStyleEvent(playerNumber, "MASSACRE");
         }
-
-        // No-hit streak milestones
         if (playerNoHitKills[playerNumber] == 3)
         {
             PushStyleEvent(playerNumber, "UNTOUCHABLE");
@@ -803,37 +811,24 @@ extend class EXPScoreEventHandler
         {
             PushStyleEvent(playerNumber, "INVINCIBLE");
         }
-
-        // Weapon swap chain
         if (playerWeaponSwapChain[playerNumber] >= 3)
         {
             PushStyleEvent(playerNumber, "STYLE CHAIN");
         }
-
-        // Elite kill count milestones
         if (eliteKill && eliteKillCount[playerNumber] > 0 && (eliteKillCount[playerNumber] % 3) == 0)
         {
             PushStyleEvent(playerNumber, "ELITE HUNTER");
         }
-
-        // Combo milestones
-        if (playerComboCount[playerNumber] == 3)
+        if (playerComboCount[playerNumber] == 5)
         {
-            PushStyleEvent(playerNumber, "COMBO x3");
-        }
-        else if (playerComboCount[playerNumber] == 5)
-        {
-            PushStyleEvent(playerNumber, "COMBO x5");
             PushStyleEvent(playerNumber, "ON FIRE");
         }
         else if (playerComboCount[playerNumber] == 10)
         {
-            PushStyleEvent(playerNumber, "COMBO x10");
             PushStyleEvent(playerNumber, "RAMPAGE");
         }
         else if (playerComboCount[playerNumber] == 20)
         {
-            PushStyleEvent(playerNumber, "COMBO x20");
             PushStyleEvent(playerNumber, "GODLIKE");
         }
 
@@ -969,3 +964,7 @@ extend class EXPScoreEventHandler
         return finalPrice;
     }
 }
+
+
+
+

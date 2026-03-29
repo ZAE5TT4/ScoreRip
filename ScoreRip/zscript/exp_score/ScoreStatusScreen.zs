@@ -1,4 +1,4 @@
-class EXPScoreStatusScreen : DoomStatusScreen
+﻿class EXPScoreStatusScreen : DoomStatusScreen
 {
     private bool newRecordSoundPlayed;
     private bool newRecordSoundArmed;
@@ -152,3 +152,5 @@ class EXPScoreStatusScreen : DoomStatusScreen
         return cv.GetBool();
     }
 }
+
+
