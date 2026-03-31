@@ -117,7 +117,7 @@
             mapContractReward[slot] = 900;
             break;
         case 4:
-            mapContractTarget[slot] = 350;
+            mapContractTarget[slot] = 180;
             mapContractReward[slot] = 850;
             break;
         case 5:
@@ -196,7 +196,7 @@
             return playerLastStylePercent[playerNumber];
         case 5: return playerNoHitKills[playerNumber];
         default:
-            int gain = playerScoreCache[playerNumber] - mapStartScore[playerNumber];
+            int gain = mapGainByPlayer[playerNumber];
             if (gain < 0) { gain = 0; }
             return gain;
         }
@@ -215,7 +215,7 @@
             return playerLastStylePercent[playerNumber];
         case 5: return playerNoHitKills[playerNumber];
         default:
-            int gain = playerScoreCache[playerNumber] - mapStartScore[playerNumber];
+            int gain = mapGainByPlayer[playerNumber];
             if (gain < 0) { gain = 0; }
             return gain;
         }
@@ -502,6 +502,7 @@
             return;
         }
 
+        QueueShopCatalogThing(e.Thing);
         TryAssignEliteMonster(e.Thing);
     }
 
@@ -699,6 +700,7 @@
         if (t == 'RedCard' || t == 'BlueCard' || t == 'YellowCard') { return true; }
         if (t == 'RedSkull' || t == 'BlueSkull' || t == 'YellowSkull') { return true; }
         if (t == 'HealthBonus' || t == 'ArmorBonus') { return true; }
+        if (!EXPScoreShopRules.IsShopCandidateClassName(String.Format("%s", t))) { return true; }
         return false;
     }
 
@@ -964,6 +966,9 @@
         return finalPrice;
     }
 }
+
+
+
 
 
 

@@ -54,7 +54,7 @@
     States
     {
     Spawn:
-        STLM ABCDDCBAABCDDCBAABCDDCBAABCDDCBAABCDDCBA 5 Bright;
+        STLM ABCDDCBAABCDDCBAABCDDCBAABCDDCBAABCDDCBAABCDDCBA 5 Bright;
         Stop;
     }
 }
@@ -104,6 +104,7 @@ class EXPEliteStarEmitter : Actor
     Spawn:
         TNT1 AA 1;
         TNT1 AA 1;
+        TNT1 AAA 1;
         Loop;
     }
 }

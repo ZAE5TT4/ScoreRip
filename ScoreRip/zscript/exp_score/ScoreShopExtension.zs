@@ -19,6 +19,9 @@
     ui int shopLastInputTic[MAXPLAYERS];
     private bool shopCatalogPrimed;
     private int shopCatalogNextRescanTic;
+    private bool shopCatalogDirty;
+    private int shopCatalogQueueCount;
+    private Actor shopCatalogQueue[512];
     override void OnRegister()
     {
         IsUiProcessor = false;
@@ -83,10 +86,8 @@
             return;
         }
 
-        ScanWorldShopItems();
-        SaveCatalogToCVar();
         shopCatalogPrimed = true;
-        shopCatalogNextRescanTic = level.time + 35;
+        shopCatalogNextRescanTic = 0;
     }
 
     private play void TickShopCatalogQueue()
@@ -99,22 +100,29 @@
         if (!shopCatalogPrimed)
         {
             PrimeShopCatalogOnce();
-            return;
         }
 
-        if (level.time < shopCatalogNextRescanTic)
+        int processed = 0;
+        while (shopCatalogQueueCount > 0 && processed < 8 && shopItemTypes.Size() < 200)
         {
-            return;
+            Actor thing = shopCatalogQueue[0];
+            for (int i = 1; i < shopCatalogQueueCount; i++)
+            {
+                shopCatalogQueue[i - 1] = shopCatalogQueue[i];
+            }
+            shopCatalogQueueCount--;
+            shopCatalogQueue[shopCatalogQueueCount] = null;
+            RegisterShopCatalogThing(thing);
+            processed++;
         }
 
-        shopCatalogNextRescanTic = level.time + 35;
-        int oldCount = shopItemTypes.Size();
-        ScanWorldShopItems();
-        if (shopItemTypes.Size() != oldCount)
+        if (shopCatalogQueueCount <= 0 && shopCatalogDirty)
         {
             SaveCatalogToCVar();
+            shopCatalogDirty = false;
         }
     }
+
 
     void ClearShopCatalog()
     {
@@ -134,6 +142,10 @@
             shopMessageExpireTic[i] = 0;
             shopLastBuyTic[i] = 0;
         }
+        shopCatalogPrimed = false;
+        shopCatalogNextRescanTic = 0;
+        shopCatalogDirty = false;
+        shopCatalogQueueCount = 0;
         IsUiProcessor = false;
         RequireMouse = false;
     }
@@ -352,7 +364,10 @@
             shopMessageExpireTic[i] = 0;
             shopLastBuyTic[i] = 0;
         }
-
+        shopCatalogPrimed = false;
+        shopCatalogNextRescanTic = 0;
+        shopCatalogDirty = false;
+        shopCatalogQueueCount = 0;
         IsUiProcessor = false;
         RequireMouse = false;
     }
@@ -367,7 +382,10 @@
             shopMessageExpireTic[i] = 0;
             shopLastBuyTic[i] = 0;
         }
-
+        shopCatalogPrimed = false;
+        shopCatalogNextRescanTic = 0;
+        shopCatalogDirty = false;
+        shopCatalogQueueCount = 0;
         IsUiProcessor = false;
         RequireMouse = false;
     }
@@ -461,8 +479,24 @@
 
     private play void RefreshShopCatalogForPlayer(int playerNumber)
     {
+        PrimeShopCatalogOnce();
         RegisterPlayerShopInventory(playerNumber);
-        ScanWorldShopItems();
+    }
+
+    private play void QueueShopCatalogThing(Actor thing)
+    {
+        if (thing == null || shopCatalogQueueCount >= 512)
+        {
+            return;
+        }
+
+        Inventory item = Inventory(thing);
+        if (item == null) { return; }
+        if (item.Owner != null) { return; }
+        if (item.GetClass() == null) { return; }
+
+        shopCatalogQueue[shopCatalogQueueCount] = thing;
+        shopCatalogQueueCount++;
     }
     private play void RegisterPlayerShopInventory(int playerNumber)
     {
@@ -588,7 +622,7 @@
         shopItemDisplayNames.Push(displayName);
         shopItemCategories.Push(category);
         shopItemPrices.Push(price);
-        if ((shopItemTypes.Size() % 3) == 0) { SaveCatalogToCVar(); }
+        shopCatalogDirty = true;
     }
 
     private play void BuyShopItemForPlayer(int playerNumber, int catalogIndex)
@@ -1038,11 +1072,19 @@
 
     private ui Font GetShopFontUI()
     {
-        int sz = GetUserIntUI('score_shop_font_size', 0);
-        if (sz == 1) { return Font.FindFont("BigFont"); }
-        if (sz == 2) { return Font.FindFont("BigFont"); }
+        int sz = GetUserIntUI('score_shop_font_size', 2);
+        if (sz <= 0) { return SmallFont; }
         return BigFont;
     }
+
+    private ui double GetShopFontScaleUI()
+    {
+        int sz = GetUserIntUI('score_shop_font_size', 2);
+        if (sz <= 0) { return 1.35; }
+        if (sz == 1) { return 1.75; }
+        return 2.10;
+    }
+
 
     private ui void DrawShopOverlayUI(int playerNumber)
     {
@@ -1082,8 +1124,8 @@
         int sw = Screen.GetWidth();
         int sh = Screen.GetHeight();
 
-        double sc     = 2.0;
-        Font   fnt    = BigFont;
+        Font   fnt    = GetShopFontUI();
+        double sc     = GetShopFontScaleUI();
         int    fontH  = int(fnt.GetHeight() * sc);
         int    fontOff = fontH / 8;
         double pulsePhase = (level.time % 35) / 35.0;
@@ -1413,6 +1455,9 @@
         EndScaleTransformUI();
     }
 }
+
+
+
 
 
 

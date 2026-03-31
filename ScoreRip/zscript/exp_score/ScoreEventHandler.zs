@@ -24,6 +24,7 @@
     private bool mapItemBonusGiven[MAXPLAYERS];
     private int lastFoundSecretsCount;
     private int mapStartScore[MAXPLAYERS];
+    private int mapGainByPlayer[MAXPLAYERS];
     private int mapKillsByPlayer[MAXPLAYERS];
     private int mapSecretsByPlayer[MAXPLAYERS];
     private int mapBestComboByPlayer[MAXPLAYERS];
@@ -632,6 +633,7 @@
             mapPlayerSeen[i] = false;
             ResetPlayerCombatState(i);
             mapStartScore[i] = 0;
+            mapGainByPlayer[i] = 0;
             mapKillsByPlayer[i] = 0;
             mapSecretsByPlayer[i] = 0;
             mapBestComboByPlayer[i] = 1;
@@ -1693,6 +1695,7 @@
             if (updated < 0) { updated = 0; }
             playerScoreCache[playerNumber] = updated;
         }
+        if (applied > 0) { mapGainByPlayer[playerNumber] += applied; }
 
         if (reason != "")
         {

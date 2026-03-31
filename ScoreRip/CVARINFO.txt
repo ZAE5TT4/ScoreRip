@@ -125,7 +125,7 @@ user int score_shop_color_text = 4;
 user int score_shop_color_muted = 8;
 user int score_shop_color_price_ok = 1;
 user int score_shop_color_price_no = 2;
-user int score_shop_font_size = 0;
+user int score_shop_font_size = 2;
 user int score_shop_color_panel_bg = 11;
 user int score_shop_color_panel_side = 10;
 user int score_shop_color_border = 2;
@@ -136,4 +136,5 @@ user int score_shop_color_row_bg = 11;
 user int score_shop_color_button_bg = 11;
 user int score_shop_color_tab_active_text = 2;
 user int score_shop_color_close_text = 2;
+
 
