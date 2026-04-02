@@ -14,6 +14,45 @@
 
         return true;
     }
+    static bool IsExplicitlyBlockedClassText(String clsText)
+    {
+        if (clsText == "dmrammo" || clsText == "leftdmrammo" || clsText == "primarypistolammo" || clsText == "secondarypistolammo" ||
+            clsText == "shotgunammo" || clsText == "autoshotgunammo" || clsText == "leftasgammo" || clsText == "revolverammo" ||
+            clsText == "leftrevolverammo" || clsText == "leftssgammo" || clsText == "p3_nailgunammo" || clsText == "pb_nailgunammo" || clsText == "plasmaammo" ||
+            clsText == "leftplasmaammo" || clsText == "rocketrounds" || clsText == "railgunammo" || clsText == "smgammo" ||
+            clsText == "leftsmgammo" || clsText == "xrifleammo" || clsText == "leftxrifleammo" || clsText == "lmgammo" ||
+            clsText == "leftm2plasmaammo" || clsText == "m2plasmaammo" || clsText == "mp40ammo" || clsText == "leftmp40ammo" || clsText == "hellammo" ||
+            clsText == "grenaderounds" || clsText == "handgrenadeammo" || clsText == "deagleammo" || clsText == "leftdeagleammo" || clsText == "chexrifleammo" ||
+            clsText == "flamerammo" || clsText == "cryorifleammo" || clsText == "asg2ammo" || clsText == "newclip" ||
+            clsText == "newshell" || clsText == "helicopterrocketammo" || clsText == "mechmortarammo" || clsText == "mechlaserammo" ||
+            clsText == "mechrocketammo" || clsText == "heavymachinegunammo" || clsText == "mechammo" || clsText == "tankammo" ||
+            clsText == "mg42heatlevel")
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    static bool IsExplicitlyBlockedTagText(String tagText)
+    {
+        if (tagText == "proximity mine" || tagText == "stun grenade" || tagText == "clip of bullets")
+        {
+            return true;
+        }
+
+        if (tagText == "heavy machine gun ammo" || tagText == "helicopter rocket ammo")
+        {
+            return true;
+        }
+
+        if (tagText == "mech ammo" || tagText == "tank ammo" || tagText == "mech mortar ammo" || tagText == "mech laser ammo" || tagText == "mech rocket ammo")
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     static bool IsForeignBuiltinItem(Inventory item, String clsText, String tagText)
     {
@@ -70,6 +109,11 @@
             return true;
         }
 
+        if (IsExplicitlyBlockedClassText(clsText) || IsExplicitlyBlockedTagText(tagText))
+        {
+            return true;
+        }
+
         return false;
     }
 
@@ -122,6 +166,11 @@
             return false;
         }
 
+        if (IsExplicitlyBlockedClassText(clsText) || IsExplicitlyBlockedTagText(tagText))
+        {
+            return false;
+        }
+
         return true;
     }
 
@@ -160,6 +209,11 @@
         }
 
         if (clsText.IndexOf("marker") >= 0 || clsText.IndexOf("counter") >= 0 || clsText.IndexOf("bootsmearer") >= 0)
+        {
+            return false;
+        }
+
+        if (IsExplicitlyBlockedClassText(clsText))
         {
             return false;
         }
@@ -336,6 +390,10 @@
         return 900;
     }
 }
+
+
+
+
 
 
 
